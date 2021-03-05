@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:duration_picker/duration_picker.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Duration Picker Demo',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Duration Picker Demo'),
+      home: MyHomePage(title: 'Duration Picker Demo'),
     );
   }
 }
@@ -22,26 +22,26 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   Duration _duration = Duration(hours: 0, minutes: 0);
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
-      body: new Center(
-        child: new Column(
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Expanded(
+            Expanded(
                 child: DurationPicker(
               duration: _duration,
               onChange: (val) {
-                this.setState(() => _duration = val);
+                setState(() => _duration = val);
               },
               snapToMins: 5.0,
             ))
@@ -49,17 +49,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: Builder(
-          builder: (BuildContext context) => new FloatingActionButton(
+          builder: (BuildContext context) => FloatingActionButton(
                 onPressed: () async {
-                  Duration resultingDuration = await showDurationPicker(
+                  var resultingDuration = await showDurationPicker(
                     context: context,
-                    initialTime: new Duration(minutes: 30),
+                    initialTime: Duration(minutes: 30),
                   );
-                  Scaffold.of(context).showSnackBar(new SnackBar(
-                      content: new Text("Chose duration: $resultingDuration")));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Chose duration: $resultingDuration')));
                 },
                 tooltip: 'Popup Duration Picker',
-                child: new Icon(Icons.add),
+                child: Icon(Icons.add),
               )),
     );
   }
