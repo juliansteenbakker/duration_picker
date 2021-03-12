@@ -1,3 +1,16 @@
+## 1.0.1
+#### Bug fixes
+* Updated example app
+
+## 1.0.0
+#### Breaking Changes
+* Added null-safety
+#### New Features
+* Popup duration picker with box decoration
+#### Bug fixes
+* Fixed Method not found: 'ButtonTheme.bar'
+
+# Changelog from flutter_duration_picker
 ## [1.0.4] - Oct 23, 2018
 
 * Fixed bug showing 60mins when approaching 0.

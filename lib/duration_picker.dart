@@ -165,9 +165,7 @@ class _DialPainter extends CustomPainter {
 
 class _Dial extends StatefulWidget {
   const _Dial(
-      {required this.duration,
-      required this.onChanged,
-      this.snapToMins = 1.0});
+      {required this.duration, required this.onChanged, this.snapToMins = 1.0});
 
   final Duration duration;
   final ValueChanged<Duration> onChanged;
@@ -476,7 +474,10 @@ class _DurationPickerDialog extends StatefulWidget {
   ///
   /// [initialTime] must not be null.
   const _DurationPickerDialog(
-      {Key? key, required this.initialTime, this.snapToMins = 1.0, this.decoration})
+      {Key? key,
+      required this.initialTime,
+      this.snapToMins = 1.0,
+      this.decoration})
       : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
@@ -621,7 +622,6 @@ Future<Duration?> showDurationPicker(
     required Duration initialTime,
     double snapToMins = 1.0,
     BoxDecoration? decoration}) async {
-
   return await showDialog<Duration>(
     context: context,
     builder: (BuildContext context) => _DurationPickerDialog(
