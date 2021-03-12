@@ -1,4 +1,4 @@
-subosito/flutter-action@v1subosito/flutter-action@v1name: Format Flutter
+name: Format Flutter
 
 on: [push, pull_request]
 
