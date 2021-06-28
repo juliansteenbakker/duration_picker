@@ -190,15 +190,15 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       ..addListener(() => setState(() {}));
     _thetaController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        _hours = _hourHand(_turningAngle);
-        _minutes = _minuteHand(_turningAngle);
+        _hours = _hourHand();
+        _minutes = _minuteHand();
         setState(() {});
       }
     });
 
     _turningAngle = _kPiByTwo - widget.duration.inMinutes / 60.0 * _kTwoPi;
-    _hours = _hourHand(_turningAngle);
-    _minutes = _minuteHand(_turningAngle);
+    _hours = _hourHand();
+    _minutes = _minuteHand();
   }
 
   late ThemeData themeData;
@@ -276,8 +276,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   Duration _notifyOnChangedIfNeeded() {
-    _hours = _hourHand(_turningAngle);
-    _minutes = _minuteHand(_turningAngle);
+    _hours = _hourHand();
+    _minutes = _minuteHand();
     var d = _angleToDuration(_turningAngle);
     widget.onChanged(d);
 
@@ -326,13 +326,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _notifyOnChangedIfNeeded();
   }
 
-  int _hourHand(double angle) {
-    return _angleToDuration(angle).inHours.toInt();
+  int _hourHand() {
+    return widget.duration.inHours;
   }
 
-  int _minuteHand(double angle) {
+  int _minuteHand() {
     // Result is in [0; 59], even if overall time is >= 1 hour
-    return (_angleToMinutes(angle) % 60.0).toInt();
+    return widget.duration.inMinutes % 60;
   }
 
   Duration _angleToDuration(double angle) {
@@ -437,8 +437,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final theme = Theme.of(context);
 
     int? selectedDialValue;
-    _hours = _hourHand(_turningAngle);
-    _minutes = _minuteHand(_turningAngle);
+    _hours = _hourHand();
+    _minutes = _minuteHand();
 
     return GestureDetector(
         excludeFromSemantics: true,
