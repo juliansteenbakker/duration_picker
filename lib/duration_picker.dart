@@ -640,12 +640,14 @@ class DurationPicker extends StatelessWidget {
   final double? width;
   final double? height;
 
-  DurationPicker(
-      {this.duration = const Duration(minutes: 0),
+  const DurationPicker(
+      {Key? key,
+      this.duration = const Duration(minutes: 0),
       required this.onChange,
       this.snapToMins,
       this.width,
-      this.height});
+      this.height})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
