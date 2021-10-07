@@ -21,8 +21,8 @@ const double _kPiByTwo = math.pi / 2;
 
 const double _kCircleTop = _kPiByTwo;
 
-class _DialPainter extends CustomPainter {
-  const _DialPainter({
+class DurationPickerDialPainter extends CustomPainter {
+  const DurationPickerDialPainter({
     required this.context,
     required this.labels,
     required this.backgroundColor,
@@ -155,7 +155,7 @@ class _DialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DialPainter oldPainter) {
+  bool shouldRepaint(DurationPickerDialPainter oldPainter) {
     return oldPainter.labels != labels ||
         oldPainter.backgroundColor != backgroundColor ||
         oldPainter.accentColor != accentColor ||
@@ -163,8 +163,8 @@ class _DialPainter extends CustomPainter {
   }
 }
 
-class _Dial extends StatefulWidget {
-  const _Dial(
+class DurationPickerDial extends StatefulWidget {
+  const DurationPickerDial(
       {required this.duration, required this.onChanged, this.snapToMins = 1.0});
 
   final Duration duration;
@@ -173,10 +173,10 @@ class _Dial extends StatefulWidget {
   /// The resolution of mins of the dial, i.e. if snapToMins = 5.0, only durations of 5min intervals will be selectable.
   final double? snapToMins;
   @override
-  _DialState createState() => _DialState();
+  DurationPickerDialState createState() => DurationPickerDialState();
 }
 
-class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
+class DurationPickerDialState extends State<DurationPickerDial> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -447,7 +447,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         onPanEnd: _handlePanEnd,
         onTapUp: _handleTapUp,
         child: CustomPaint(
-          painter: _DialPainter(
+          painter: DurationPickerDialPainter(
             pct: _pct,
             multiplier: _hours,
             minuteHand: _minutes,
@@ -531,7 +531,7 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
         padding: const EdgeInsets.all(16.0),
         child: AspectRatio(
             aspectRatio: 1.0,
-            child: _Dial(
+            child: DurationPickerDial(
               duration: _selectedDuration!,
               onChanged: _handleTimeChanged,
               snapToMins: widget.snapToMins,
@@ -657,7 +657,7 @@ class DurationPicker extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
-                child: _Dial(
+                child: DurationPickerDial(
                   duration: duration,
                   onChanged: onChange,
                   snapToMins: snapToMins,
