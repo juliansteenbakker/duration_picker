@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:duration_picker/duration_picker.dart';
+import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
@@ -55,7 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () async {
                   var resultingDuration = await showDurationPicker(
                     context: context,
-                    initialTime: const Duration(minutes: 30),
+                    initialTime: const Duration(seconds: 30),
+                    baseUnit: BaseUnit.second,
                   );
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Chose duration: $resultingDuration')));
