@@ -113,7 +113,6 @@ class _DialPainter extends CustomPainter {
     }
 
     // Draw the Text in the center of the circle which displays the duration string
-    // TODO: Handle units
     var secondaryUnits = (baseUnitMultiplier == 0) ? '' : '$baseUnitMultiplier${getSecondaryUnitString()} ';
     var baseUnits = '$baseUnitHand';
 
@@ -121,7 +120,10 @@ class _DialPainter extends CustomPainter {
         textAlign: TextAlign.center,
         text: TextSpan(
             text: '$secondaryUnits$baseUnits',
-            style: Theme.of(context).textTheme.headline2!.copyWith(fontSize: size.shortestSide * 0.15)),
+            style: Theme.of(context)
+                .textTheme
+                .headline2!
+                .copyWith(fontSize: size.shortestSide * 0.15)),
         textDirection: TextDirection.ltr)
       ..layout();
     var middleForValueText = Offset(
@@ -265,7 +267,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _animateTo(double targetTheta) {
     final currentTheta = _theta.value;
     var beginTheta =
-    _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
+        _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
     beginTheta = _nearest(targetTheta, beginTheta, currentTheta - _kTwoPi);
     _thetaTween
       ..begin = beginTheta
@@ -600,10 +602,10 @@ class _DurationPickerDialog extends StatefulWidget {
   /// [initialTime] must not be null.
   const _DurationPickerDialog(
       {Key? key,
-        required this.initialTime,
-        this.baseUnit = BaseUnit.minute,
-        this.snapToMins = 1.0,
-        this.decoration})
+      required this.initialTime,
+      this.baseUnit = BaseUnit.minute,
+      this.snapToMins = 1.0,
+      this.decoration})
       : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
@@ -677,46 +679,46 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
 
     final dialog = Dialog(child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-          final Widget pickerAndActions = Container(
-            decoration: boxDecoration,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Expanded(
-                    child:
-                    picker), // picker grows and shrinks with the available space
-                actions,
-              ],
-            ),
-          );
+        final Widget pickerAndActions = Container(
+          decoration: boxDecoration,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Expanded(
+                  child:
+                  picker), // picker grows and shrinks with the available space
+              actions,
+            ],
+          ),
+        );
 
-          switch (orientation) {
-            case Orientation.portrait:
-              return SizedBox(
-                  width: _kDurationPickerWidthPortrait,
-                  height: _kDurationPickerHeightPortrait,
-                  child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Expanded(
-                          child: pickerAndActions,
-                        ),
-                      ]));
-            case Orientation.landscape:
-              return SizedBox(
-                  width: _kDurationPickerWidthLandscape,
-                  height: _kDurationPickerHeightLandscape,
-                  child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Flexible(
-                          child: pickerAndActions,
-                        ),
-                      ]));
-          }
-        }));
+        switch (orientation) {
+          case Orientation.portrait:
+            return SizedBox(
+                width: _kDurationPickerWidthPortrait,
+                height: _kDurationPickerHeightPortrait,
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Expanded(
+                        child: pickerAndActions,
+                      ),
+                    ]));
+          case Orientation.landscape:
+            return SizedBox(
+                width: _kDurationPickerWidthLandscape,
+                height: _kDurationPickerHeightLandscape,
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Flexible(
+                        child: pickerAndActions,
+                      ),
+                    ]));
+        }
+      }));
 
     return Theme(
       data: theme.copyWith(
@@ -747,10 +749,10 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
 /// ```
 Future<Duration?> showDurationPicker(
     {required BuildContext context,
-      required Duration initialTime,
-      BaseUnit baseUnit = BaseUnit.minute,
-      double snapToMins = 1.0,
-      BoxDecoration? decoration}) async {
+    required Duration initialTime,
+    BaseUnit baseUnit = BaseUnit.minute,
+    double snapToMins = 1.0,
+    BoxDecoration? decoration}) async {
   return await showDialog<Duration>(
     context: context,
     builder: (BuildContext context) => _DurationPickerDialog(
@@ -773,12 +775,12 @@ class DurationPicker extends StatelessWidget {
 
   const DurationPicker(
       {Key? key,
-        this.duration = const Duration(minutes: 0),
-        required this.onChange,
-        this.baseUnit = BaseUnit.minute,
-        this.snapToMins,
-        this.width,
-        this.height})
+      this.duration = const Duration(minutes: 0),
+      required this.onChange,
+      this.baseUnit = BaseUnit.minute,
+      this.snapToMins,
+      this.width,
+      this.height})
       : super(key: key);
 
   @override

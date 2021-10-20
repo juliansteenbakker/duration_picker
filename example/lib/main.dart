@@ -1,5 +1,5 @@
-import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:duration_picker/duration_picker.dart';
 
 void main() => runApp(const MyApp());
 
