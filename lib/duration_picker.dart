@@ -66,7 +66,8 @@ class _DialPainter extends CustomPainter {
 
     // Draw a translucent circle for every secondary unit
     for (var i = 0; i < baseUnitMultiplier; i = i + 1) {
-      canvas.drawCircle(centerPoint, radius, Paint()..color = accentColor.withOpacity((i == 0) ? 0.3 : 0.1));
+      canvas.drawCircle(centerPoint, radius,
+        Paint()..color = accentColor.withOpacity((i == 0) ? 0.3 : 0.1));
     }
 
     // Draw the inner background circle
@@ -679,46 +680,46 @@ class _DurationPickerDialogState extends State<_DurationPickerDialog> {
 
     final dialog = Dialog(child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-        final Widget pickerAndActions = Container(
-          decoration: boxDecoration,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Expanded(
-                  child:
-                  picker), // picker grows and shrinks with the available space
-              actions,
-            ],
-          ),
-        );
+          final Widget pickerAndActions = Container(
+            decoration: boxDecoration,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Expanded(
+                    child:
+                    picker), // picker grows and shrinks with the available space
+                actions,
+              ],
+            ),
+          );
 
-        switch (orientation) {
-          case Orientation.portrait:
-            return SizedBox(
-                width: _kDurationPickerWidthPortrait,
-                height: _kDurationPickerHeightPortrait,
-                child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Expanded(
-                        child: pickerAndActions,
-                      ),
-                    ]));
-          case Orientation.landscape:
-            return SizedBox(
-                width: _kDurationPickerWidthLandscape,
-                height: _kDurationPickerHeightLandscape,
-                child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Flexible(
-                        child: pickerAndActions,
-                      ),
-                    ]));
-        }
-      }));
+          switch (orientation) {
+            case Orientation.portrait:
+              return SizedBox(
+                  width: _kDurationPickerWidthPortrait,
+                  height: _kDurationPickerHeightPortrait,
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Expanded(
+                          child: pickerAndActions,
+                        ),
+                      ]));
+            case Orientation.landscape:
+              return SizedBox(
+                  width: _kDurationPickerWidthLandscape,
+                  height: _kDurationPickerHeightLandscape,
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Flexible(
+                          child: pickerAndActions,
+                        ),
+                      ]));
+          }
+        }));
 
     return Theme(
       data: theme.copyWith(
