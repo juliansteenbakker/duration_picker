@@ -59,8 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     initialTime: const Duration(seconds: 30),
                     baseUnit: BaseUnit.second,
                   );
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Chose duration: $resultingDuration')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Chose duration: $resultingDuration')));
                 },
                 tooltip: 'Popup Duration Picker',
                 child: const Icon(Icons.add),
