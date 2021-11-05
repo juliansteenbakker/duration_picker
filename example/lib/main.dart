@@ -29,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Duration _duration = const Duration(hours: 0, minutes: 0);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () async {
                   var resultingDuration = await showDurationPicker(
                     context: context,
-                    initialTime: const Duration(minutes: 30),
+                    initialTime: const Duration(seconds: 30),
+                    baseUnit: BaseUnit.second,
                   );
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Chose duration: $resultingDuration')));
