@@ -455,7 +455,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
             selectedValue: selectedDialValue,
             labels: _buildMinutes(theme.textTheme),
             backgroundColor: backgroundColor,
-            accentColor: themeData.accentColor,
+            accentColor: themeData.colorScheme.secondary,
             theta: _theta.value,
             textDirection: Directionality.of(context),
           ),
