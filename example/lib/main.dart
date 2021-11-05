@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
                 child: DurationPicker(
               duration: _duration,
+              baseUnit: BaseUnit.second,
               onChange: (val) {
                 setState(() => _duration = val);
               },
