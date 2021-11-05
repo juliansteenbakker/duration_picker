@@ -176,7 +176,8 @@ class DurationPickerDial extends StatefulWidget {
   DurationPickerDialState createState() => DurationPickerDialState();
 }
 
-class DurationPickerDialState extends State<DurationPickerDial> with SingleTickerProviderStateMixin {
+class DurationPickerDialState extends State<DurationPickerDial>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
