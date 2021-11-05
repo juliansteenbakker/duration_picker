@@ -21,8 +21,8 @@ const double _kPiByTwo = math.pi / 2;
 
 const double _kCircleTop = _kPiByTwo;
 
-class _DialPainter extends CustomPainter {
-  const _DialPainter({
+class DialPainter extends CustomPainter {
+  const DialPainter({
     required this.context,
     required this.labels,
     required this.backgroundColor,
@@ -187,7 +187,7 @@ class _DialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DialPainter oldPainter) {
+  bool shouldRepaint(DialPainter oldPainter) {
     return oldPainter.labels != labels ||
         oldPainter.backgroundColor != backgroundColor ||
         oldPainter.accentColor != accentColor ||
@@ -595,7 +595,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         onPanEnd: _handlePanEnd,
         onTapUp: _handleTapUp,
         child: CustomPaint(
-          painter: _DialPainter(
+          painter: DialPainter(
             pct: _pct,
             baseUnitMultiplier: _secondaryUnitValue,
             baseUnitHand: _baseUnitValue,
@@ -618,11 +618,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 /// selected [Duration] if the user taps the "OK" button, or null if the user
 /// taps the "CANCEL" button. The selected time is reported by calling
 /// [Navigator.pop].
-class _DurationPickerDialog extends StatefulWidget {
+class DurationPickerDialog extends StatefulWidget {
   /// Creates a duration picker.
   ///
   /// [initialTime] must not be null.
-  const _DurationPickerDialog(
+  const DurationPickerDialog(
       {Key? key,
       required this.initialTime,
       this.baseUnit = BaseUnit.minute,
@@ -640,7 +640,7 @@ class _DurationPickerDialog extends StatefulWidget {
   _DurationPickerDialogState createState() => _DurationPickerDialogState();
 }
 
-class _DurationPickerDialogState extends State<_DurationPickerDialog> {
+class _DurationPickerDialogState extends State<DurationPickerDialog> {
   @override
   void initState() {
     super.initState();
@@ -777,7 +777,7 @@ Future<Duration?> showDurationPicker(
     BoxDecoration? decoration}) async {
   return await showDialog<Duration>(
     context: context,
-    builder: (BuildContext context) => _DurationPickerDialog(
+    builder: (BuildContext context) => DurationPickerDialog(
       initialTime: initialTime,
       baseUnit: baseUnit,
       snapToMins: snapToMins,
