@@ -1,4 +1,4 @@
-## 1.0.1
+## 1.1.0+1
 #### New Features
 * It is now possible to select the base unit of the timer using baseunit: parameter. 
 See example app for an example.
