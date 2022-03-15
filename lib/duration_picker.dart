@@ -260,8 +260,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   late AnimationController _thetaController;
 
   final double _pct = 0.0;
+  // int _snappedHours = 0;
+  // int _hours = 0;
+  // hours
   int _secondaryUnitValue = 0;
   bool _dragging = false;
+  // minutes
   int _baseUnitValue = 0;
   double _turningAngle = 0.0;
 
@@ -345,34 +349,27 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   // TODO: Fix snap to mins
   Duration _getTimeForTheta(double theta) {
-    return _angleToDuration(_turningAngle);
-    // var fractionalRotation = (0.25 - (theta / _kTwoPi));
-    // fractionalRotation = fractionalRotation < 0
-    //    ? 1 - fractionalRotation.abs()
-    //    : fractionalRotation;
-    // var mins = (fractionalRotation * 60).round();
-    // debugPrint('Mins0: ${widget.snapToMins }');
-    // if (widget.snapToMins != null) {
-    //   debugPrint('Mins1: $mins');
-    //  mins = ((mins / widget.snapToMins!).round() * widget.snapToMins!).round();
-    //   debugPrint('Mins2: $mins');
-    // }
-    // if (mins == 60) {
-    //  // _snappedHours = _hours + 1;
-    //  // mins = 0;
-    //  return new Duration(hours: 1, minutes: mins);
-    // } else {
-    //  // _snappedHours = _hours;
-    //  return new Duration(hours: _hours, minutes: mins);
-    // }
+    // return _angleToDuration(1);
+    var fractionalRotation = (0.25 - (theta / _kTwoPi));
+    fractionalRotation = fractionalRotation < 0
+       ? 1 - fractionalRotation.abs()
+       : fractionalRotation;
+    var mins = (fractionalRotation * 60).round();
+    debugPrint('Mins0: ${widget.snapToMins }');
+    if (widget.snapToMins != null) {
+      debugPrint('Mins1: $mins');
+     mins = ((mins / widget.snapToMins!).round() * widget.snapToMins!).round();
+      debugPrint('Mins2: $mins');
+    }
+    return _baseUnitToDuration(mins);
   }
 
   Duration _notifyOnChangedIfNeeded() {
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
-    var d = _angleToDuration(_turningAngle);
+    var d = _getTimeForTheta(_turningAngle);
+    // var d = _angleToDuration(_turningAngle);
     widget.onChanged(d);
-
     return d;
   }
 
@@ -503,7 +500,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _dragging = false;
     _position = null;
     _center = null;
-    _animateTo(_getThetaForDuration(widget.duration, widget.baseUnit));
+
+    final Duration calculatedDuration = _getTimeForTheta(_theta.value);
+    // widget.onChanged(calculatedDuration);
+    _animateTo(_getThetaForDuration(calculatedDuration, widget.baseUnit));
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -513,8 +513,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
 
+    final Duration calculatedDuration = _getTimeForTheta(_theta.value);
+    widget.onChanged(calculatedDuration);
+    _notifyOnChangedIfNeeded();
+
     _animateTo(
-        _getThetaForDuration(_getTimeForTheta(_theta.value), widget.baseUnit));
+        _getThetaForDuration(calculatedDuration, widget.baseUnit));
     _dragging = false;
     _position = null;
     _center = null;
@@ -565,6 +569,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       labels.add(painter);
     }
     return labels;
+  }
+
+  double _angleToMinutes(double angle) {
+    // Coordinate transformation from mathematical COS to dial COS
+    double dialAngle = _kPiByTwo - angle;
+
+    // Turn dial angle into minutes, may go beyond 60 minutes (multiple turns)
+    return dialAngle / _kTwoPi * 60.0;
   }
 
   @override

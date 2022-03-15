@@ -1,3 +1,7 @@
+## 1.1.1
+* Upgraded dependencies
+* Made the dialog public so you can use the element without the dialog.
+
 ## 1.1.0+1
 #### New Features
 * It is now possible to select the base unit of the timer using baseunit: parameter. 
