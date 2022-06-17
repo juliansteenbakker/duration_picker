@@ -48,9 +48,9 @@ class DialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const _epsilon = .001;
-    const _sweep = _kTwoPi - _epsilon;
-    const _startAngle = -math.pi / 2.0;
+    const epsilon = .001;
+    const sweep = _kTwoPi - epsilon;
+    const startAngle = -math.pi / 2.0;
 
     final radius = size.shortestSide / 2.0;
     final center = Offset(size.width / 2.0, size.height / 2.0);
@@ -72,9 +72,9 @@ class DialPainter extends CustomPainter {
         Paint()..color = Theme.of(context).canvasColor);
 
     // Get the offset point for an angle value of theta, and a distance of _radius
-    Offset getOffsetForTheta(double theta, double _radius) {
+    Offset getOffsetForTheta(double theta, double radius) {
       return center +
-          Offset(_radius * math.cos(theta), -_radius * math.sin(theta));
+          Offset(radius * math.cos(theta), -radius * math.sin(theta));
     }
 
     // Draw the handle that is used to drag and to indicate the position around the circle
@@ -159,8 +159,8 @@ class DialPainter extends CustomPainter {
         center: centerPoint,
         radius: radius - radius * 0.12 / 2,
       ),
-      _startAngle,
-      _sweep * pctTheta,
+      startAngle,
+      sweep * pctTheta,
       false,
       elapsedPainter,
     );
@@ -634,10 +634,10 @@ class DurationPickerDialog extends StatefulWidget {
   final BoxDecoration? decoration;
 
   @override
-  _DurationPickerDialogState createState() => _DurationPickerDialogState();
+  DurationPickerDialogState createState() => DurationPickerDialogState();
 }
 
-class _DurationPickerDialogState extends State<DurationPickerDialog> {
+class DurationPickerDialogState extends State<DurationPickerDialog> {
   @override
   void initState() {
     super.initState();
