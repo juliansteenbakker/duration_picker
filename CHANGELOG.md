@@ -1,10 +1,13 @@
+## 1.1.1
+Switched to lint and applied all suggested lints.
+
 ## 1.1.0+1
-#### New Features
+New Features
 * It is now possible to select the base unit of the timer using baseunit: parameter. 
 See example app for an example.
   
 ## 1.0.1
-#### Bug fixes
+Bug fixes
 * Updated example app
 
 ## 1.0.0
