@@ -18,6 +18,7 @@ const double _kPiByTwo = math.pi / 2;
 
 const double _kCircleTop = _kPiByTwo;
 
+/// Use [DialPainter] to style the durationPicker to your style.
 class DialPainter extends CustomPainter {
   const DialPainter({
     required this.context,
@@ -827,6 +828,7 @@ Future<Duration?> showDurationPicker({
   );
 }
 
+/// The [DurationPicker] widget.
 class DurationPicker extends StatelessWidget {
   final Duration duration;
   final ValueChanged<Duration> onChange;
@@ -869,6 +871,7 @@ class DurationPicker extends StatelessWidget {
   }
 }
 
+/// This enum contains the possible units for the [DurationPicker]
 enum BaseUnit {
   millisecond,
   second,
