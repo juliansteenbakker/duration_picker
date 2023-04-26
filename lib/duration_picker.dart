@@ -654,6 +654,7 @@ class DurationPickerDialog extends StatefulWidget {
     this.baseUnit = BaseUnit.minute,
     this.snapToMins = 1.0,
     this.decoration,
+    this.keepInitialDurationRemainder = false,
   }) : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
@@ -661,6 +662,10 @@ class DurationPickerDialog extends StatefulWidget {
   final BaseUnit baseUnit;
   final double snapToMins;
   final BoxDecoration? decoration;
+
+  /// Add the remainder of the [initialTime] resulting form
+  /// [baseUnit] to the result
+  final bool keepInitialDurationRemainder;
 
   @override
   DurationPickerDialogState createState() => DurationPickerDialogState();
@@ -694,8 +699,40 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
     Navigator.pop(context);
   }
 
+  Duration _getInitialDurationRemiander() {
+    switch (widget.baseUnit) {
+      case BaseUnit.millisecond:
+        return Duration(
+          microseconds: widget.initialTime.inMicroseconds
+              .remainder(Duration.microsecondsPerMillisecond),
+        );
+      case BaseUnit.second:
+        return Duration(
+          microseconds: widget.initialTime.inMicroseconds
+              .remainder(Duration.microsecondsPerSecond),
+        );
+      case BaseUnit.minute:
+        return Duration(
+          microseconds: widget.initialTime.inMicroseconds
+              .remainder(Duration.microsecondsPerMinute),
+        );
+      case BaseUnit.hour:
+        return Duration(
+          microseconds: widget.initialTime.inMicroseconds
+              .remainder(Duration.millisecondsPerHour),
+        );
+    }
+  }
+
   void _handleOk() {
-    Navigator.pop(context, _selectedDuration);
+    if (widget.keepInitialDurationRemainder && _selectedDuration != null) {
+      Navigator.pop(
+        context,
+        _selectedDuration! + _getInitialDurationRemiander(),
+      );
+    } else {
+      Navigator.pop(context, _selectedDuration);
+    }
   }
 
   @override
@@ -816,6 +853,10 @@ Future<Duration?> showDurationPicker({
   BaseUnit baseUnit = BaseUnit.minute,
   double snapToMins = 1.0,
   BoxDecoration? decoration,
+
+  /// Add the remainder of the [initialTime] resulting form
+  /// [baseUnit] to the result
+  bool keepInitialDurationRemainder = false,
 }) async {
   return showDialog<Duration>(
     context: context,
@@ -824,6 +865,7 @@ Future<Duration?> showDurationPicker({
       baseUnit: baseUnit,
       snapToMins: snapToMins,
       decoration: decoration,
+      keepInitialDurationRemainder: keepInitialDurationRemainder,
     ),
   );
 }
