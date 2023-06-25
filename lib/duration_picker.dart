@@ -567,7 +567,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         );
         break;
       case BaseUnit.minute:
-        const int interval = 5;
+        const int interval = 30;
         const int factor = Duration.minutesPerHour;
         const int length = factor ~/ interval;
         baseUnitMarkerValues = List.generate(
