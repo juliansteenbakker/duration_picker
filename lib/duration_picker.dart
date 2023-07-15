@@ -3,6 +3,7 @@ library duration_picker;
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:duration_picker/localization/localization.dart';
 import 'package:flutter/material.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -91,29 +92,33 @@ class DialPainter extends CustomPainter {
 
     // Get the appropriate base unit string
     String getBaseUnitString() {
+      final localization = DurationPickerLocalizations.of(context);
+
       switch (baseUnit) {
         case BaseUnit.millisecond:
-          return 'ms.';
+          return localization.baseUnitMillisecond;
         case BaseUnit.second:
-          return 'sec.';
+          return localization.baseUnitSecond;
         case BaseUnit.minute:
-          return 'min.';
+          return localization.baseUnitMinute;
         case BaseUnit.hour:
-          return 'hr.';
+          return localization.baseUnitHour;
       }
     }
 
     // Get the appropriate secondary unit string
     String getSecondaryUnitString() {
+      final localization = DurationPickerLocalizations.of(context);
+
       switch (baseUnit) {
         case BaseUnit.millisecond:
-          return 's ';
+          return localization.secondaryUnitMillisecond;
         case BaseUnit.second:
-          return 'm ';
+          return localization.secondaryUnitSecond;
         case BaseUnit.minute:
-          return 'h ';
+          return localization.secondaryUnitMinute;
         case BaseUnit.hour:
-          return 'd ';
+          return localization.secondaryUnitHour;
       }
     }
 
