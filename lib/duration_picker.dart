@@ -12,8 +12,8 @@ const double _kDurationPickerWidthLandscape = 512.0;
 const double _kDurationPickerHeightPortrait = 380.0;
 const double _kDurationPickerHeightLandscape = 304.0;
 
-const double _kTwoPi = 2 * math.pi;
-const double _kPiByTwo = math.pi / 2;
+const double _kTwoPi = 2 * math.pi; // 360 degrees in radians
+const double _kPiByTwo = math.pi / 2; // 90 degrees in radians
 
 const double _kCircleTop = _kPiByTwo;
 
@@ -46,7 +46,6 @@ class DialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print("theta: $theta");
     const epsilon = .001;
     const sweep = _kTwoPi - epsilon;
     const startAngle = -math.pi / 2.0;
@@ -205,13 +204,11 @@ class DialPainter extends CustomPainter {
 }
 
 class _Dial extends StatefulWidget {
-  _Dial({
+  const _Dial({
     required this.duration,
     required this.onChanged,
     this.baseUnit = BaseUnit.minute,
-  }) {
-    print("_Dial: duration: $duration");
-  }
+  });
 
   final Duration duration;
   final ValueChanged<Duration> onChanged;
@@ -244,7 +241,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         setState(() {});
       }
     });
-    print("_theta: ${_theta}");
     _turningAngle = _kPiByTwo - _turningAngleFactor() * _kTwoPi;
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
@@ -283,7 +279,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _animateTo(double targetTheta) {
-    print("animdateTo $targetTheta");
     final currentTheta = _theta.value;
     var beginTheta =
         _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
@@ -521,7 +516,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<TextPainter> _buildBaseUnitLabels(TextTheme textTheme) {
-    final style = textTheme.subtitle1;
+    final style = textTheme.titleMedium;
 
     var baseUnitMarkerValues = <Duration>[];
 
@@ -607,7 +602,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           labels: _buildBaseUnitLabels(theme.textTheme),
           backgroundColor: backgroundColor,
           accentColor: themeData.colorScheme.secondary,
-          theta: _theta.value,
+          theta: _getThetaForDuration(widget.duration, widget.baseUnit),
           textDirection: Directionality.of(context),
         ),
       ),
