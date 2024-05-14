@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 snapToMins: 5.0,
               ),
-            )
+            ),
           ],
         ),
       ),
