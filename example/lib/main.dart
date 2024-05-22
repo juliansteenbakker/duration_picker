@@ -47,12 +47,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChange: (val) {
                   setState(() => _duration = val);
                 },
-                upperBound: const Duration(
-                  seconds: 120,
-                ),
-                lowerBound: const Duration(
-                  seconds: 5,
-                ),
+                // upperBound: const Duration(
+                //   seconds: 120,
+                // ),
+                // lowerBound: const Duration(
+                //   seconds: 5,
+                // ),
               ),
             ),
           ],
