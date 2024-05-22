@@ -1,6 +1,6 @@
 name: duration_picker
 description: A time picker widget that can select both minutes and hours. Fork from flutter_duration_picker.
-version: 1.1.1
+version: 1.2.0
 homepage: https://github.com/juliansteenbakker/duration_picker
 
 environment:
@@ -14,4 +14,4 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.4
+  lint: ^1.10.0
