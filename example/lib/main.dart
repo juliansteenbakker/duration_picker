@@ -28,7 +28,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Duration _duration = Duration.zero;
+  Duration _duration = const Duration(seconds: 60);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChange: (val) {
                   setState(() => _duration = val);
                 },
-                // snapToMins: 5.0,
+                snapToMins: 5.0,
+                upperBound: const Duration(
+                  seconds: 120,
+                ),
+                lowerBound: const Duration(
+                  seconds: 5,
+                ),
               ),
             ),
           ],
@@ -60,6 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
               context: context,
               initialTime: const Duration(seconds: 30),
               baseUnit: BaseUnit.second,
+              upperBound: const Duration(seconds: 60),
+              lowerBound: const Duration(seconds: 10),
             );
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(

@@ -213,20 +213,31 @@ class _Dial extends StatefulWidget {
     required this.duration,
     required this.onChanged,
     this.baseUnit = BaseUnit.minute,
+    this.upperBound,
+    this.lowerBound,
   });
 
   final Duration duration;
   final ValueChanged<Duration> onChanged;
   final BaseUnit baseUnit;
+  final Duration? upperBound;
+  final Duration? lowerBound;
 
   @override
   _DialState createState() => _DialState();
 }
 
 class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
+  late final double? _upperBoundAngle;
+  late final double? _lowerBoundAngel;
+  late final int _countSmallestTimeUnitInPeriod;
+
   @override
   void initState() {
     super.initState();
+    _countSmallestTimeUnitInPeriod =
+        _getCountSmallestTimeUnitInPeriod(widget.baseUnit);
+
     _thetaController = AnimationController(
       duration: _kDialAnimateDuration,
       vsync: this,
@@ -246,9 +257,32 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         setState(() {});
       }
     });
-    _turningAngle = _kPiByTwo - _turningAngleFactor() * _kTwoPi;
+    
+    _turningAngle = _calcAngle(widget.duration, widget.baseUnit);
+
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
+
+    final upperBound = widget.upperBound;
+    final lowerBound = widget.lowerBound;
+
+    _upperBoundAngle =
+        upperBound != null ? _calcAngle(upperBound, widget.baseUnit) : null;
+    _lowerBoundAngel =
+        lowerBound != null ? _calcAngle(lowerBound, widget.baseUnit) : null;
+  }
+
+  int _getCountSmallestTimeUnitInPeriod(BaseUnit baseUnit) {
+    switch (baseUnit) {
+      case BaseUnit.millisecond:
+        return Duration.microsecondsPerSecond;
+      case BaseUnit.second:
+        return Duration.millisecondsPerMinute;
+      case BaseUnit.minute:
+        return Duration.millisecondsPerHour;
+      case BaseUnit.hour:
+        return Duration.millisecondsPerDay;
+    }
   }
 
   late ThemeData themeData;
@@ -353,9 +387,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         _kTwoPi;
   }
 
-  double _turningAngleFactor() {
-    return _getDurationInBaseUnits(widget.duration, widget.baseUnit) /
-        _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
+  double _calcAngle(Duration duration, BaseUnit baseUnit) {
+    return duration.inMilliseconds / _countSmallestTimeUnitInPeriod * _kTwoPi;
   }
 
   Duration _getTimeForTheta(double theta) {
@@ -373,7 +406,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   void _updateThetaForPan() {
     setState(() {
-      final offset = _position! - _center!;
+      final offset = _startPosition! - _center!;
       final angle = (math.atan2(offset.dx, offset.dy) - _kPiByTwo) % _kTwoPi;
 
       // Stop accidental abrupt pans from making the dial seem like it starts from 1h.
@@ -389,14 +422,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     });
   }
 
-  Offset? _position;
+  Offset? _startPosition;
   Offset? _center;
 
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
     final box = context.findRenderObject() as RenderBox?;
-    _position = box?.globalToLocal(details.globalPosition);
+    _startPosition = box?.globalToLocal(details.globalPosition);
     _center = box?.size.center(Offset.zero);
 
     _notifyOnChangedIfNeeded();
@@ -404,8 +437,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   void _handlePanUpdate(DragUpdateDetails details) {
     final oldTheta = _theta.value;
-    _position = _position! + details.delta;
-    // _position! += details.delta;
+    _startPosition = _startPosition! + details.delta;
+    //_startposition! += details.delta;
     _updateThetaForPan();
     final newTheta = _theta.value;
 
@@ -424,34 +457,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   Duration _angleToDuration(double angle) {
-    return _baseUnitToDuration(_angleToBaseUnit(angle));
-  }
-
-  Duration _baseUnitToDuration(double baseUnitValue) {
-    final int unitFactor = _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
-
-    switch (widget.baseUnit) {
-      case BaseUnit.millisecond:
-        return Duration(
-          seconds: baseUnitValue ~/ unitFactor,
-          milliseconds: (baseUnitValue % unitFactor.toDouble()).toInt(),
-        );
-      case BaseUnit.second:
-        return Duration(
-          minutes: baseUnitValue ~/ unitFactor,
-          seconds: (baseUnitValue % unitFactor.toDouble()).toInt(),
-        );
-      case BaseUnit.minute:
-        return Duration(
-          hours: baseUnitValue ~/ unitFactor,
-          minutes: (baseUnitValue % unitFactor.toDouble()).toInt(),
-        );
-      case BaseUnit.hour:
-        return Duration(
-          days: baseUnitValue ~/ unitFactor,
-          hours: (baseUnitValue % unitFactor.toDouble()).toInt(),
-        );
-    }
+    final millisecondsInAngle =
+        (angle.abs() / _kTwoPi * _countSmallestTimeUnitInPeriod).round();
+    return Duration(milliseconds: millisecondsInAngle);
   }
 
   String _durationToBaseUnitString(Duration duration) {
@@ -467,47 +475,53 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
   }
 
-  double _angleToBaseUnit(double angle) {
-    // Coordinate transformation from mathematical COS to dial COS
-    final dialAngle = _kPiByTwo - angle;
+  // double _angleToBaseUnit(double angle) {
+  //   // Coordinate transformation from mathematical COS to dial COS
+  //   final dialAngle = _kPiByTwo - angle;
 
-    // Turn dial angle into minutes, may go beyond 60 minutes (multiple turns)
-    return dialAngle /
-        _kTwoPi *
-        _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
-  }
+  //   // Turn dial angle into minutes, may go beyond 60 minutes (multiple turns)
+  //   return dialAngle /
+  //       _kTwoPi *
+  //       _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
+  // }
 
   void _updateTurningAngle(double oldTheta, double newTheta) {
     // Register any angle by which the user has turned the dial.
     //
     // The resulting turning angle fully captures the state of the dial,
     // including multiple turns (= full hours). The [_turningAngle] is in
-    // mathematical coordinate system, i.e. 3-o-clock position being zero, and
+    // mathematical coordinate system, i.e. 0-o-clock position being zero, and
     // increasing counter clock wise.
 
     // From positive to negative (in mathematical COS)
     if (newTheta > 1.5 * math.pi && oldTheta < 0.5 * math.pi) {
-      _turningAngle = _turningAngle - ((_kTwoPi - newTheta) + oldTheta);
+      _turningAngle = _turningAngle + ((_kTwoPi - newTheta) + oldTheta);
     }
     // From negative to positive (in mathematical COS)
     else if (newTheta < 0.5 * math.pi && oldTheta > 1.5 * math.pi) {
-      _turningAngle = _turningAngle + ((_kTwoPi - oldTheta) + newTheta);
+      _turningAngle = _turningAngle - ((_kTwoPi - oldTheta) + newTheta);
     } else {
-      _turningAngle = _turningAngle + (newTheta - oldTheta);
+      _turningAngle = _turningAngle + (oldTheta - newTheta);
+    }
+
+    if (_upperBoundAngle != null && _turningAngle > _upperBoundAngle!) {
+      _turningAngle = _upperBoundAngle!;
+    } else if (_lowerBoundAngel != null && _turningAngle < _lowerBoundAngel!) {
+      _turningAngle = _lowerBoundAngel!;
     }
   }
 
   void _handlePanEnd(DragEndDetails details) {
     assert(_dragging);
     _dragging = false;
-    _position = null;
+    _startPosition = null;
     _center = null;
     _animateTo(_getThetaForDuration(widget.duration, widget.baseUnit));
   }
 
   void _handleTapUp(TapUpDetails details) {
     final box = context.findRenderObject() as RenderBox?;
-    _position = box?.globalToLocal(details.globalPosition);
+    _startPosition = box?.globalToLocal(details.globalPosition);
     _center = box?.size.center(Offset.zero);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
@@ -516,7 +530,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _getThetaForDuration(_getTimeForTheta(_theta.value), widget.baseUnit),
     );
     _dragging = false;
-    _position = null;
+    _startPosition = null;
     _center = null;
   }
 
@@ -581,7 +595,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         backgroundColor = Colors.grey[200];
         break;
       case Brightness.dark:
-        backgroundColor = themeData.colorScheme.surface;
+        backgroundColor = themeData.colorScheme.background;
         break;
     }
 
@@ -630,12 +644,16 @@ class DurationPickerDialog extends StatefulWidget {
     required this.initialTime,
     this.baseUnit = BaseUnit.minute,
     this.decoration,
+    this.upperBound,
+    this.lowerBound,
   }) : super(key: key);
 
   /// The duration initially selected when the dialog is shown.
   final Duration initialTime;
   final BaseUnit baseUnit;
   final BoxDecoration? decoration;
+  final Duration? upperBound;
+  final Duration? lowerBound;
 
   @override
   DurationPickerDialogState createState() => DurationPickerDialogState();
@@ -687,6 +705,8 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
           duration: _selectedDuration!,
           onChanged: _handleTimeChanged,
           baseUnit: widget.baseUnit,
+          upperBound: widget.upperBound,
+          lowerBound: widget.lowerBound,
         ),
       ),
     );
@@ -789,6 +809,8 @@ Future<Duration?> showDurationPicker({
   required Duration initialTime,
   BaseUnit baseUnit = BaseUnit.minute,
   BoxDecoration? decoration,
+  Duration? upperBound,
+  Duration? lowerBound,
 }) async {
   return showDialog<Duration>(
     context: context,
@@ -796,6 +818,8 @@ Future<Duration?> showDurationPicker({
       initialTime: initialTime,
       baseUnit: baseUnit,
       decoration: decoration,
+      upperBound: upperBound,
+      lowerBound: lowerBound,
     ),
   );
 }
@@ -805,6 +829,8 @@ class DurationPicker extends StatelessWidget {
   final Duration duration;
   final ValueChanged<Duration> onChange;
   final BaseUnit baseUnit;
+  final Duration? upperBound;
+  final Duration? lowerBound;
 
   final double? width;
   final double? height;
@@ -816,6 +842,8 @@ class DurationPicker extends StatelessWidget {
     this.baseUnit = BaseUnit.minute,
     this.width,
     this.height,
+    this.upperBound,
+    this.lowerBound,
   }) : super(key: key);
 
   @override
@@ -832,6 +860,8 @@ class DurationPicker extends StatelessWidget {
               duration: duration,
               onChanged: onChange,
               baseUnit: baseUnit,
+              upperBound: upperBound,
+              lowerBound: lowerBound,
             ),
           ),
         ],
