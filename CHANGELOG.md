@@ -1,3 +1,8 @@
+## 1.2.0
+* Add localization options
+* Update deprecated functions
+* Add upper and lower bound for duration
+
 ## 1.1.1
 Switched to lint and applied all suggested lints.
 

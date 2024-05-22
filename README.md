@@ -132,7 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onChange: (val) {
                 setState(() => _duration = val);
               },
-              snapToMins: 5.0,
             ))
           ],
         ),

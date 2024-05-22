@@ -1,5 +1,3 @@
-library duration_picker;
-
 import 'dart:math' as math;
 
 import 'package:duration_picker/localization/localization.dart';
@@ -369,7 +367,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   double _turningAngleFactor(Duration? duration) {
     return _getDurationInBaseUnits(
-            duration ?? widget.duration, widget.baseUnit) /
+          duration ?? widget.duration,
+          widget.baseUnit,
+        ) /
         _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
   }
 
@@ -836,6 +836,8 @@ class DurationPicker extends StatelessWidget {
   final BaseUnit baseUnit;
   final Duration? upperBound;
   final Duration? lowerBound;
+  @Deprecated('This value was never used')
+  final double? snapToMins;
 
   final double? width;
   final double? height;
@@ -849,6 +851,7 @@ class DurationPicker extends StatelessWidget {
     this.lowerBound,
     this.width,
     this.height,
+    @Deprecated('This value was never used') this.snapToMins,
   }) : super(key: key);
 
   @override
