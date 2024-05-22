@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 snapToMins: 5.0,
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
               initialTime: const Duration(seconds: 30),
               baseUnit: BaseUnit.second,
             );
-            if (!mounted) return;
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Chose duration: $resultingDuration'),
