@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
               upperBound: const Duration(seconds: 60),
               lowerBound: const Duration(seconds: 10),
             );
-            if (!mounted) return;
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Chose duration: $resultingDuration'),

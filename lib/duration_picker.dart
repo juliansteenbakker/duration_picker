@@ -1,8 +1,8 @@
 library duration_picker;
 
-import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:duration_picker/localization/localization.dart';
 import 'package:flutter/material.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -13,8 +13,8 @@ const double _kDurationPickerWidthLandscape = 512.0;
 const double _kDurationPickerHeightPortrait = 380.0;
 const double _kDurationPickerHeightLandscape = 304.0;
 
-const double _kTwoPi = 2 * math.pi;
-const double _kPiByTwo = math.pi / 2;
+const double _kTwoPi = 2 * math.pi; // 360 degrees in radians
+const double _kPiByTwo = math.pi / 2; // 90 degrees in radians
 
 const double _kCircleTop = _kPiByTwo;
 
@@ -28,7 +28,6 @@ class DialPainter extends CustomPainter {
     required this.theta,
     required this.textDirection,
     required this.selectedValue,
-    required this.pct,
     required this.baseUnitMultiplier,
     required this.baseUnitHand,
     required this.baseUnit,
@@ -42,7 +41,6 @@ class DialPainter extends CustomPainter {
   final int? selectedValue;
   final BuildContext context;
 
-  final double pct;
   final int baseUnitMultiplier;
   final int baseUnitHand;
   final BaseUnit baseUnit;
@@ -91,29 +89,33 @@ class DialPainter extends CustomPainter {
 
     // Get the appropriate base unit string
     String getBaseUnitString() {
+      final localization = DurationPickerLocalizations.of(context);
+
       switch (baseUnit) {
         case BaseUnit.millisecond:
-          return 'ms.';
+          return localization.baseUnitMillisecond;
         case BaseUnit.second:
-          return 'sec.';
+          return localization.baseUnitSecond;
         case BaseUnit.minute:
-          return 'min.';
+          return localization.baseUnitMinute;
         case BaseUnit.hour:
-          return 'hr.';
+          return localization.baseUnitHour;
       }
     }
 
     // Get the appropriate secondary unit string
     String getSecondaryUnitString() {
+      final localization = DurationPickerLocalizations.of(context);
+
       switch (baseUnit) {
         case BaseUnit.millisecond:
-          return 's ';
+          return localization.secondaryUnitMillisecond;
         case BaseUnit.second:
-          return 'm ';
+          return localization.secondaryUnitSecond;
         case BaseUnit.minute:
-          return 'h ';
+          return localization.secondaryUnitMinute;
         case BaseUnit.hour:
-          return 'd ';
+          return localization.secondaryUnitHour;
       }
     }
 
@@ -211,7 +213,6 @@ class _Dial extends StatefulWidget {
     required this.duration,
     required this.onChanged,
     this.baseUnit = BaseUnit.minute,
-    this.snapToMins = 1.0,
     this.upperBound,
     this.lowerBound,
   });
@@ -219,9 +220,6 @@ class _Dial extends StatefulWidget {
   final Duration duration;
   final ValueChanged<Duration> onChanged;
   final BaseUnit baseUnit;
-
-  /// The resolution of mins of the dial, i.e. if snapToMins = 5.0, only durations of 5min intervals will be selectable.
-  final double? snapToMins;
   final Duration? upperBound;
   final Duration? lowerBound;
 
@@ -246,6 +244,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     );
     _thetaTween = Tween<double>(
       begin: _getThetaForDuration(widget.duration, widget.baseUnit),
+      end: 0,
+      //end: _getThetaForDuration(widget.duration, widget.baseUnit),
     );
     _theta = _thetaTween.animate(
       CurvedAnimation(parent: _thetaController, curve: Curves.fastOutSlowIn),
@@ -257,7 +257,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         setState(() {});
       }
     });
-
+    
     _turningAngle = _calcAngle(widget.duration, widget.baseUnit);
 
     _secondaryUnitValue = _secondaryUnitHand();
@@ -308,7 +308,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   late Animation<double> _theta;
   late AnimationController _thetaController;
 
-  final double _pct = 0.0;
   int _secondaryUnitValue = 0;
   bool _dragging = false;
   int _baseUnitValue = 0;
@@ -392,28 +391,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     return duration.inMilliseconds / _countSmallestTimeUnitInPeriod * _kTwoPi;
   }
 
-  // TODO: Fix snap to mins
   Duration _getTimeForTheta(double theta) {
     return _angleToDuration(_turningAngle);
-    // var fractionalRotation = (0.25 - (theta / _kTwoPi));
-    // fractionalRotation = fractionalRotation < 0
-    //    ? 1 - fractionalRotation.abs()
-    //    : fractionalRotation;
-    // var mins = (fractionalRotation * 60).round();
-    // debugPrint('Mins0: ${widget.snapToMins }');
-    // if (widget.snapToMins != null) {
-    //   debugPrint('Mins1: $mins');
-    //  mins = ((mins / widget.snapToMins!).round() * widget.snapToMins!).round();
-    //   debugPrint('Mins2: $mins');
-    // }
-    // if (mins == 60) {
-    //  // _snappedHours = _hours + 1;
-    //  // mins = 0;
-    //  return new Duration(hours: 1, minutes: mins);
-    // } else {
-    //  // _snappedHours = _hours;
-    //  return new Duration(hours: _hours, minutes: mins);
-    // }
   }
 
   Duration _notifyOnChangedIfNeeded() {
@@ -634,7 +613,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onTapUp: _handleTapUp,
       child: CustomPaint(
         painter: DialPainter(
-          pct: _pct,
           baseUnitMultiplier: _secondaryUnitValue,
           baseUnitHand: _baseUnitValue,
           baseUnit: widget.baseUnit,
@@ -643,7 +621,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           labels: _buildBaseUnitLabels(theme.textTheme),
           backgroundColor: backgroundColor,
           accentColor: themeData.colorScheme.secondary,
-          theta: _theta.value,
+          theta: _getThetaForDuration(widget.duration, widget.baseUnit),
           textDirection: Directionality.of(context),
         ),
       ),
@@ -665,7 +643,6 @@ class DurationPickerDialog extends StatefulWidget {
     Key? key,
     required this.initialTime,
     this.baseUnit = BaseUnit.minute,
-    this.snapToMins = 1.0,
     this.decoration,
     this.upperBound,
     this.lowerBound,
@@ -674,7 +651,6 @@ class DurationPickerDialog extends StatefulWidget {
   /// The duration initially selected when the dialog is shown.
   final Duration initialTime;
   final BaseUnit baseUnit;
-  final double snapToMins;
   final BoxDecoration? decoration;
   final Duration? upperBound;
   final Duration? lowerBound;
@@ -729,7 +705,6 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
           duration: _selectedDuration!,
           onChanged: _handleTimeChanged,
           baseUnit: widget.baseUnit,
-          snapToMins: widget.snapToMins,
           upperBound: widget.upperBound,
           lowerBound: widget.lowerBound,
         ),
@@ -833,7 +808,6 @@ Future<Duration?> showDurationPicker({
   required BuildContext context,
   required Duration initialTime,
   BaseUnit baseUnit = BaseUnit.minute,
-  double snapToMins = 1.0,
   BoxDecoration? decoration,
   Duration? upperBound,
   Duration? lowerBound,
@@ -843,7 +817,6 @@ Future<Duration?> showDurationPicker({
     builder: (BuildContext context) => DurationPickerDialog(
       initialTime: initialTime,
       baseUnit: baseUnit,
-      snapToMins: snapToMins,
       decoration: decoration,
       upperBound: upperBound,
       lowerBound: lowerBound,
@@ -856,7 +829,6 @@ class DurationPicker extends StatelessWidget {
   final Duration duration;
   final ValueChanged<Duration> onChange;
   final BaseUnit baseUnit;
-  final double? snapToMins;
   final Duration? upperBound;
   final Duration? lowerBound;
 
@@ -868,7 +840,6 @@ class DurationPicker extends StatelessWidget {
     this.duration = Duration.zero,
     required this.onChange,
     this.baseUnit = BaseUnit.minute,
-    this.snapToMins,
     this.width,
     this.height,
     this.upperBound,
@@ -889,7 +860,6 @@ class DurationPicker extends StatelessWidget {
               duration: duration,
               onChanged: onChange,
               baseUnit: baseUnit,
-              snapToMins: snapToMins,
               upperBound: upperBound,
               lowerBound: lowerBound,
             ),
