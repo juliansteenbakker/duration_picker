@@ -222,6 +222,7 @@ class _Dial extends StatefulWidget {
   final BaseUnit baseUnit;
   final Duration? upperBound;
   final Duration? lowerBound;
+  final double? snapToMins = 5;
 
   @override
   _DialState createState() => _DialState();
@@ -379,17 +380,21 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   Duration _getTimeForTheta(double theta) {
-    // return _angleToDuration(1);
-    var fractionalRotation = (0.25 - (theta / _kTwoPi));
+    var fractionalRotation = 0.25 - (theta / _kTwoPi);
     fractionalRotation = fractionalRotation < 0
        ? 1 - fractionalRotation.abs()
        : fractionalRotation;
-    var mins = (fractionalRotation * 60).round();
-    debugPrint('Mins0: ${widget.snapToMins }');
+    double mins = fractionalRotation * 60;
+    double? roundedMins;
+    debugPrint('Mins0: ${widget.snapToMins } $mins');
     if (widget.snapToMins != null) {
       debugPrint('Mins1: $mins');
-     mins = ((mins / widget.snapToMins!).round() * widget.snapToMins!).round();
+     mins = (mins / widget.snapToMins!).round() * widget.snapToMins!;
       debugPrint('Mins2: $mins');
+    }
+
+    if (widget.upperBound != null && mins > widget.upperBound!.inMinutes) {
+      return _baseUnitToDuration(widget.upperBound!.inMinutes.toDouble());
     }
     return _baseUnitToDuration(mins);
   }
