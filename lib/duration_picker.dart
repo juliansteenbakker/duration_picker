@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:duration_picker/localization/localization.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 

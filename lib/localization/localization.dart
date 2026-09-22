@@ -1,6 +1,6 @@
 import 'package:duration_picker/localization/en.dart';
 import 'package:duration_picker/localization/ko.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 abstract class DurationPickerLocalizations {
   String get baseUnitMillisecond;

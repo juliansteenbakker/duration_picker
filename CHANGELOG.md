@@ -1,3 +1,6 @@
+## 1.4.0
+* Depend on material_ui so dialogs resolve MaterialLocalizations from MaterialApp
+
 ## 1.3.0
 * Replace deprecated ButtonBar by OverflowBar
 * Apply DatePickerTheme to the buttons

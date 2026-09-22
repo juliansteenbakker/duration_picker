@@ -10,6 +10,8 @@ A little widget for picking durations. Heavily inspired from the Material Design
 In order to support other languages, developers need to configure localization settings like the settings for the time picker. Example for english and korean:
 
 ```dart
+import 'package:material_ui/material_ui.dart';
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -87,7 +89,7 @@ dependencies:
 ```
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:duration_picker/duration_picker.dart';
 
 void main() => runApp(MyApp());
