@@ -22,10 +22,14 @@ const double _kPiByTwo = math.pi / 2; // 90 degrees in radians
 
 const double _kCircleTop = _kPiByTwo;
 
+// Larger labels collide around the default-size dial.
+const double _kMaxTextScaleFactor = 1.5;
+
 class _DialPainter extends CustomPainter {
   const _DialPainter({
     required this.labels,
     required this.labelTextStyle,
+    required this.textScaler,
     required this.backgroundColor,
     required this.accentColor,
     required this.valueTextStyle,
@@ -40,6 +44,7 @@ class _DialPainter extends CustomPainter {
 
   final List<String> labels;
   final TextStyle labelTextStyle;
+  final TextScaler textScaler;
   final Color backgroundColor;
   final Color accentColor;
   final TextStyle valueTextStyle;
@@ -125,6 +130,7 @@ class _DialPainter extends CustomPainter {
         style: unitTextStyle,
       ),
       textDirection: TextDirection.ltr,
+      textScaler: textScaler,
     )..layout();
     textMinPainter.paint(
       canvas,
@@ -161,6 +167,7 @@ class _DialPainter extends CustomPainter {
       final label = TextPainter(
         text: TextSpan(style: labelTextStyle, text: text),
         textDirection: TextDirection.ltr,
+        textScaler: textScaler,
       )..layout();
       final labelOffset = Offset(-label.width / 2.0, -label.height / 2.0);
 
@@ -178,6 +185,7 @@ class _DialPainter extends CustomPainter {
   bool shouldRepaint(_DialPainter oldDelegate) {
     return !listEquals(oldDelegate.labels, labels) ||
         oldDelegate.labelTextStyle != labelTextStyle ||
+        oldDelegate.textScaler != textScaler ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.accentColor != accentColor ||
         oldDelegate.valueTextStyle != valueTextStyle ||
@@ -700,6 +708,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           labels: _buildBaseUnitLabels(),
           labelTextStyle:
               textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
+          textScaler: MediaQuery.textScalerOf(context)
+              .clamp(maxScaleFactor: _kMaxTextScaleFactor),
           backgroundColor:
               pickerTheme.dialBackgroundColor ?? _defaultDialBackground(),
           accentColor: pickerTheme.handColor ?? colorScheme.primary,
