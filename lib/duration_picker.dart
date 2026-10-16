@@ -227,8 +227,8 @@ class _Dial extends StatefulWidget {
 }
 
 class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
-  late final double? _upperBoundAngle;
-  late final double? _lowerBoundAngel;
+  double? _upperBoundAngle;
+  double? _lowerBoundAngel;
 
   @override
   void initState() {
@@ -261,13 +261,38 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _turningAngle = _kPiByTwo - _turningAngleFactor(null) * _kTwoPi;
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
+    _updateBoundAngles();
+  }
 
+  @override
+  void didUpdateWidget(_Dial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateBoundAngles();
+    if (!_dragging) {
+      _syncTurningAngle();
+    }
+  }
+
+  void _updateBoundAngles() {
     _upperBoundAngle = widget.upperBound != null
         ? _kPiByTwo - _turningAngleFactor(widget.upperBound) * _kTwoPi
         : null;
     _lowerBoundAngel = widget.lowerBound != null
         ? _kPiByTwo - _turningAngleFactor(widget.lowerBound) * _kTwoPi
         : null;
+  }
+
+  // The turning angle keeps the fraction of a unit between updates, so it is
+  // only reset when the parent passes a duration it doesn't round down to.
+  void _syncTurningAngle() {
+    if (_angleToDuration(_turningAngle) != widget.duration) {
+      _turningAngle = _kPiByTwo - _turningAngleFactor(null) * _kTwoPi;
+      // A pan measures its turn from the hand's angle, so move the hand too.
+      final theta = _getThetaForDuration(widget.duration, widget.baseUnit);
+      _thetaTween
+        ..begin = theta
+        ..end = theta;
+    }
   }
 
   late ThemeData themeData;
@@ -532,8 +557,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     // Without a lower bound, zero is the limit, so a fast pan back across
     // the top can't produce a negative duration.
     final lowerBoundAngle = _lowerBoundAngel ?? _kPiByTwo;
-    if (_upperBoundAngle != null && _turningAngle < _upperBoundAngle) {
-      _turningAngle = _upperBoundAngle;
+    final upperBoundAngle = _upperBoundAngle;
+    if (upperBoundAngle != null && _turningAngle < upperBoundAngle) {
+      _turningAngle = upperBoundAngle;
     } else if (_turningAngle > lowerBoundAngle) {
       _turningAngle = lowerBoundAngle;
     }
@@ -542,6 +568,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanEnd(DragEndDetails details) {
     assert(_dragging);
     _dragging = false;
+    // Outside changes are ignored while dragging, so the dial doesn't stall
+    // when the parent rounds the value; pick up the final one here.
+    _syncTurningAngle();
     _position = null;
     _center = null;
     _animateTo(_getThetaForDuration(widget.duration, widget.baseUnit));
