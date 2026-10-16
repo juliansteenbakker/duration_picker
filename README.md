@@ -57,6 +57,35 @@ class _MyWidgetState extends State<MyWidget> {
 | `title` | dialog | A widget shown above the dial. |
 | `decoration` | dialog | A `BoxDecoration` for the dialog's content. |
 | `width`, `height` | inline | The size of the picker. |
+| `theme` | both | A `DurationPickerThemeData` for this picker only. See [Theming](#theming). |
+
+## Theming
+
+The picker follows your app's `ColorScheme` and `TextTheme`. To change its colors or text styles everywhere, add a `DurationPickerThemeData` to your theme's extensions:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    colorSchemeSeed: Colors.indigo,
+    extensions: const [
+      DurationPickerThemeData(
+        handColor: Colors.teal,
+        labelTextStyle: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+);
+```
+
+Pass one as `theme` to style a single picker; its fields take precedence over the app-wide ones.
+
+| Field | Default |
+| --- | --- |
+| `dialBackgroundColor` | `ColorScheme.surfaceContainerHighest` |
+| `handColor` | `ColorScheme.primary` |
+| `valueTextStyle` | `TextTheme.displayMedium`, sized to the dial |
+| `unitTextStyle` | `TextTheme.bodyMedium` |
+| `labelTextStyle` | `TextTheme.titleMedium` |
 
 ## Localization
 

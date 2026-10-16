@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:duration_picker/localization/localization.dart';
+import 'package:duration_picker/src/duration_picker_theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+export 'src/duration_picker_theme.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
 
@@ -19,29 +22,31 @@ const double _kCircleTop = _kPiByTwo;
 
 class _DialPainter extends CustomPainter {
   const _DialPainter({
-    required this.context,
     required this.labels,
     required this.backgroundColor,
     required this.accentColor,
+    required this.valueTextStyle,
+    required this.scaleValueText,
+    required this.unitTextStyle,
+    required this.baseUnitLabel,
+    required this.secondaryUnitLabel,
     required this.theta,
-    required this.textDirection,
-    required this.selectedValue,
     required this.baseUnitMultiplier,
     required this.baseUnitHand,
-    required this.baseUnit,
   });
 
   final List<TextPainter> labels;
-  final Color? backgroundColor;
+  final Color backgroundColor;
   final Color accentColor;
+  final TextStyle valueTextStyle;
+  final bool scaleValueText;
+  final TextStyle unitTextStyle;
+  final String baseUnitLabel;
+  final String secondaryUnitLabel;
   final double theta;
-  final TextDirection textDirection;
-  final int? selectedValue;
-  final BuildContext context;
 
   final int baseUnitMultiplier;
   final int baseUnitHand;
-  final BaseUnit baseUnit;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,24 +60,26 @@ class _DialPainter extends CustomPainter {
 
     final pctTheta = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
 
-    // Draw the background outer ring
-    canvas.drawCircle(centerPoint, radius, Paint()..color = backgroundColor!);
+    // The ring is stroked rather than filled, so whatever is behind the dial
+    // shows through in the middle.
+    final ringWidth = radius * 0.12;
+    final ringRadius = radius - ringWidth / 2;
+    Paint ringPaint(Color color) => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = ringWidth
+      ..color = color;
 
-    // Draw a translucent circle for every secondary unit
+    // Draw the background outer ring
+    canvas.drawCircle(centerPoint, ringRadius, ringPaint(backgroundColor));
+
+    // Draw a translucent ring for every secondary unit
     for (var i = 0; i < baseUnitMultiplier; i = i + 1) {
       canvas.drawCircle(
         centerPoint,
-        radius,
-        Paint()..color = accentColor.withValues(alpha: (i == 0) ? 0.3 : 0.1),
+        ringRadius,
+        ringPaint(accentColor.withValues(alpha: (i == 0) ? 0.3 : 0.1)),
       );
     }
-
-    // Draw the inner background circle
-    canvas.drawCircle(
-      centerPoint,
-      radius * 0.88,
-      Paint()..color = Theme.of(context).canvasColor,
-    );
 
     // Get the offset point for an angle value of theta, and a distance of _radius
     Offset getOffsetForTheta(double theta, double radius) {
@@ -85,52 +92,19 @@ class _DialPainter extends CustomPainter {
     final handlePoint = getOffsetForTheta(theta, radius - 10.0);
     canvas.drawCircle(handlePoint, 20.0, handlePaint);
 
-    // Get the appropriate base unit string
-    String getBaseUnitString() {
-      final localization = DurationPickerLocalizations.of(context);
-
-      switch (baseUnit) {
-        case BaseUnit.millisecond:
-          return localization.baseUnitMillisecond;
-        case BaseUnit.second:
-          return localization.baseUnitSecond;
-        case BaseUnit.minute:
-          return localization.baseUnitMinute;
-        case BaseUnit.hour:
-          return localization.baseUnitHour;
-      }
-    }
-
-    // Get the appropriate secondary unit string
-    String getSecondaryUnitString() {
-      final localization = DurationPickerLocalizations.of(context);
-
-      switch (baseUnit) {
-        case BaseUnit.millisecond:
-          return localization.secondaryUnitMillisecond;
-        case BaseUnit.second:
-          return localization.secondaryUnitSecond;
-        case BaseUnit.minute:
-          return localization.secondaryUnitMinute;
-        case BaseUnit.hour:
-          return localization.secondaryUnitHour;
-      }
-    }
-
     // Draw the Text in the center of the circle which displays the duration string
     final secondaryUnits = (baseUnitMultiplier == 0)
         ? ''
-        : '$baseUnitMultiplier${getSecondaryUnitString()} ';
+        : '$baseUnitMultiplier$secondaryUnitLabel ';
     final baseUnits = '$baseUnitHand';
 
     final textDurationValuePainter = TextPainter(
       textAlign: TextAlign.center,
       text: TextSpan(
         text: '$secondaryUnits$baseUnits',
-        style: Theme.of(context)
-            .textTheme
-            .displayMedium!
-            .copyWith(fontSize: size.shortestSide * 0.15),
+        style: scaleValueText
+            ? valueTextStyle.copyWith(fontSize: size.shortestSide * 0.15)
+            : valueTextStyle,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -143,8 +117,8 @@ class _DialPainter extends CustomPainter {
     final textMinPainter = TextPainter(
       textAlign: TextAlign.center,
       text: TextSpan(
-        text: getBaseUnitString(), //th: ${theta}',
-        style: Theme.of(context).textTheme.bodyMedium,
+        text: baseUnitLabel,
+        style: unitTextStyle,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -164,13 +138,10 @@ class _DialPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..color = accentColor.withValues(alpha: 0.3)
       ..isAntiAlias = true
-      ..strokeWidth = radius * 0.12;
+      ..strokeWidth = ringWidth;
 
     canvas.drawArc(
-      Rect.fromCircle(
-        center: centerPoint,
-        radius: radius - radius * 0.12 / 2,
-      ),
+      Rect.fromCircle(center: centerPoint, radius: ringRadius),
       startAngle,
       sweep * pctTheta,
       false,
@@ -202,6 +173,13 @@ class _DialPainter extends CustomPainter {
     return oldDelegate.labels != labels ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.accentColor != accentColor ||
+        oldDelegate.valueTextStyle != valueTextStyle ||
+        oldDelegate.scaleValueText != scaleValueText ||
+        oldDelegate.unitTextStyle != unitTextStyle ||
+        oldDelegate.baseUnitLabel != baseUnitLabel ||
+        oldDelegate.secondaryUnitLabel != secondaryUnitLabel ||
+        oldDelegate.baseUnitMultiplier != baseUnitMultiplier ||
+        oldDelegate.baseUnitHand != baseUnitHand ||
         oldDelegate.theta != theta;
   }
 }
@@ -213,6 +191,7 @@ class _Dial extends StatefulWidget {
     this.baseUnit = BaseUnit.minute,
     this.upperBound,
     this.lowerBound,
+    this.theme,
   });
 
   final Duration duration;
@@ -220,6 +199,7 @@ class _Dial extends StatefulWidget {
   final BaseUnit baseUnit;
   final Duration? upperBound;
   final Duration? lowerBound;
+  final DurationPickerThemeData? theme;
 
   @override
   _DialState createState() => _DialState();
@@ -596,9 +576,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
   }
 
-  List<TextPainter> _buildBaseUnitLabels(TextTheme textTheme) {
-    final style = textTheme.titleMedium;
-
+  List<TextPainter> _buildBaseUnitLabels(TextStyle style) {
     var baseUnitMarkerValues = <Duration>[];
 
     switch (widget.baseUnit) {
@@ -645,19 +623,41 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     return labels;
   }
 
+  String _baseUnitLabel(DurationPickerLocalizations localization) {
+    switch (widget.baseUnit) {
+      case BaseUnit.millisecond:
+        return localization.baseUnitMillisecond;
+      case BaseUnit.second:
+        return localization.baseUnitSecond;
+      case BaseUnit.minute:
+        return localization.baseUnitMinute;
+      case BaseUnit.hour:
+        return localization.baseUnitHour;
+    }
+  }
+
+  String _secondaryUnitLabel(DurationPickerLocalizations localization) {
+    switch (widget.baseUnit) {
+      case BaseUnit.millisecond:
+        return localization.secondaryUnitMillisecond;
+      case BaseUnit.second:
+        return localization.secondaryUnitSecond;
+      case BaseUnit.minute:
+        return localization.secondaryUnitMinute;
+      case BaseUnit.hour:
+        return localization.secondaryUnitHour;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color? backgroundColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        backgroundColor = Colors.grey[200];
-      case Brightness.dark:
-        backgroundColor = themeData.colorScheme.surface;
-    }
+    final colorScheme = themeData.colorScheme;
+    final textTheme = themeData.textTheme;
+    final pickerTheme = (themeData.extension<DurationPickerThemeData>() ??
+            const DurationPickerThemeData())
+        .merge(widget.theme);
+    final localization = DurationPickerLocalizations.of(context);
 
-    final theme = Theme.of(context);
-
-    int? selectedDialValue;
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
 
@@ -682,14 +682,19 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         painter: _DialPainter(
           baseUnitMultiplier: _secondaryUnitValue,
           baseUnitHand: _baseUnitValue,
-          baseUnit: widget.baseUnit,
-          context: context,
-          selectedValue: selectedDialValue,
-          labels: _buildBaseUnitLabels(theme.textTheme),
-          backgroundColor: backgroundColor,
-          accentColor: themeData.colorScheme.secondary,
+          labels: _buildBaseUnitLabels(
+            textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
+          ),
+          backgroundColor: pickerTheme.dialBackgroundColor ??
+              colorScheme.surfaceContainerHighest,
+          accentColor: pickerTheme.handColor ?? colorScheme.primary,
+          valueTextStyle:
+              textTheme.displayMedium!.merge(pickerTheme.valueTextStyle),
+          scaleValueText: pickerTheme.valueTextStyle?.fontSize == null,
+          unitTextStyle: textTheme.bodyMedium!.merge(pickerTheme.unitTextStyle),
+          baseUnitLabel: _baseUnitLabel(localization),
+          secondaryUnitLabel: _secondaryUnitLabel(localization),
           theta: _getThetaForDuration(widget.duration, widget.baseUnit),
-          textDirection: Directionality.of(context),
         ),
       ),
     );
@@ -729,6 +734,7 @@ class DurationPickerDialog extends StatefulWidget {
     this.upperBound,
     this.lowerBound,
     this.title,
+    this.theme,
   });
 
   /// The duration initially selected when the dialog is shown.
@@ -740,6 +746,9 @@ class DurationPickerDialog extends StatefulWidget {
 
   /// Shown above the dial, usually a [Text].
   final Widget? title;
+
+  /// Overrides the [DurationPickerThemeData] from the app's theme.
+  final DurationPickerThemeData? theme;
 
   @override
   DurationPickerDialogState createState() => DurationPickerDialogState();
@@ -789,8 +798,7 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final theme = Theme.of(context);
-    final boxDecoration =
-        widget.decoration ?? BoxDecoration(color: theme.colorScheme.surface);
+    final boxDecoration = widget.decoration ?? const BoxDecoration();
     final Widget picker = Padding(
       padding: const EdgeInsets.all(16.0),
       child: AspectRatio(
@@ -801,6 +809,7 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
           baseUnit: widget.baseUnit,
           upperBound: widget.upperBound,
           lowerBound: widget.lowerBound,
+          theme: widget.theme,
         ),
       ),
     );
@@ -911,6 +920,7 @@ Future<Duration?> showDurationPicker({
   Duration? upperBound,
   Duration? lowerBound,
   Widget? title,
+  DurationPickerThemeData? theme,
 }) {
   return showDialog<Duration>(
     context: context,
@@ -921,6 +931,7 @@ Future<Duration?> showDurationPicker({
       upperBound: upperBound,
       lowerBound: lowerBound,
       title: title,
+      theme: theme,
     ),
   );
 }
@@ -936,6 +947,9 @@ class DurationPicker extends StatelessWidget {
   final double? width;
   final double? height;
 
+  /// Overrides the [DurationPickerThemeData] from the app's theme.
+  final DurationPickerThemeData? theme;
+
   const DurationPicker({
     super.key,
     this.duration = Duration.zero,
@@ -945,6 +959,7 @@ class DurationPicker extends StatelessWidget {
     this.lowerBound,
     this.width,
     this.height,
+    this.theme,
   });
 
   @override
@@ -963,6 +978,7 @@ class DurationPicker extends StatelessWidget {
               baseUnit: baseUnit,
               upperBound: upperBound,
               lowerBound: lowerBound,
+              theme: theme,
             ),
           ),
         ],
