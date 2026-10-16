@@ -712,6 +712,8 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
           duration: _selectedDuration!,
           onChanged: _handleTimeChanged,
           baseUnit: widget.baseUnit,
+          upperBound: widget.upperBound,
+          lowerBound: widget.lowerBound,
         ),
       ),
     );
