@@ -3,6 +3,32 @@
 * Update deprecated functions
 * Add upper and lower bound for duration
 
+## [2.0.0](https://github.com/juliansteenbakker/duration_picker/compare/v1.3.0...v2.0.0) (2026-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* `DurationPickerDialogState` and its `selectedDuration` getter are no longer public. Read the selected duration from the `Future` returned by `showDurationPicker`, or from `showDialog` when showing `DurationPickerDialog` yourself.
+* The picker's default colors now come from the color scheme. The handle and elapsed ring use `ColorScheme.primary` instead of `secondary`, on Material 3 the ring uses `surfaceContainerHighest` instead of `Colors.grey[200]` (or `surface` in dark mode), and the middle of the dial is transparent instead of `canvasColor`; set `DurationPickerThemeData(handColor: colorScheme.secondary)` to get the old hand color back. `showDurationPicker` also no longer paints its content with `ColorScheme.surface`, so the dialog keeps its own background color and rounded shape; pass `decoration: BoxDecoration(color: colorScheme.surface)` for the old look.
+* `DialPainter` is no longer exported; it couldn't be passed to the picker, so it had no use outside the package. The deprecated `snapToMins` parameter of `DurationPicker` is removed; it was never used, so drop the argument.
+
+### Features
+
+* make the dial adjustable with screen readers ([#57](https://github.com/juliansteenbakker/duration_picker/issues/57)) ([c9a63da](https://github.com/juliansteenbakker/duration_picker/commit/c9a63dad43ab5126f1bfe57a6a35caba40aa840a))
+* style the picker through DurationPickerThemeData ([#53](https://github.com/juliansteenbakker/duration_picker/issues/53)) ([3049350](https://github.com/juliansteenbakker/duration_picker/commit/30493508797074d70f56d93e07d11235da409390))
+
+
+### Bug Fixes
+
+* dispose the dial's text painters and curved animation ([#55](https://github.com/juliansteenbakker/duration_picker/issues/55)) ([b4603a7](https://github.com/juliansteenbakker/duration_picker/commit/b4603a7f28218ec597b18e582e9cf7c4a073c4ab))
+* scale the dial labels with the system text size ([#56](https://github.com/juliansteenbakker/duration_picker/issues/56)) ([f21d52e](https://github.com/juliansteenbakker/duration_picker/commit/f21d52e492be62762a01cfdc37afd4125b9fc284))
+
+
+### Code Refactoring
+
+* make DialPainter private and remove snapToMins ([ca29d9d](https://github.com/juliansteenbakker/duration_picker/commit/ca29d9d7cc62790a2a53014a30ab149795445ecc))
+* make the dialog state private and export the localizations ([#54](https://github.com/juliansteenbakker/duration_picker/issues/54)) ([1f7c22a](https://github.com/juliansteenbakker/duration_picker/commit/1f7c22a1ab92fdfda24b3566ddc626ed84619bc7))
+
 ## [1.3.0](https://github.com/juliansteenbakker/duration_picker/compare/v1.2.0...v1.3.0) (2026-10-16)
 
 
