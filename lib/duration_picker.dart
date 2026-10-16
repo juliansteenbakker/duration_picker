@@ -672,6 +672,39 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
   }
 
+  Duration get _oneBaseUnit {
+    switch (widget.baseUnit) {
+      case BaseUnit.millisecond:
+        return const Duration(milliseconds: 1);
+      case BaseUnit.second:
+        return const Duration(seconds: 1);
+      case BaseUnit.minute:
+        return const Duration(minutes: 1);
+      case BaseUnit.hour:
+        return const Duration(hours: 1);
+    }
+  }
+
+  String _semanticsValue(
+    Duration duration,
+    DurationPickerLocalizations localization,
+  ) {
+    final secondaryUnits =
+        _getDurationInSecondaryUnits(duration, widget.baseUnit);
+    final baseUnits = _getDurationInBaseUnits(duration, widget.baseUnit) %
+        _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
+    final secondary = secondaryUnits == 0
+        ? ''
+        : '$secondaryUnits${_secondaryUnitLabel(localization)}';
+    return '$secondary$baseUnits ${_baseUnitLabel(localization)}';
+  }
+
+  void _selectDuration(Duration duration) {
+    _turningAngle = _kPiByTwo - _turningAngleFactor(duration) * _kTwoPi;
+    _notifyOnChangedIfNeeded();
+    _animateTo(_getThetaForDuration(duration, widget.baseUnit));
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = themeData.colorScheme;
@@ -684,42 +717,61 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
 
-    return RawGestureDetector(
-      excludeFromSemantics: true,
-      gestures: <Type, GestureRecognizerFactory>{
-        _DialPanGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<_DialPanGestureRecognizer>(
-          () => _DialPanGestureRecognizer(debugOwner: this),
-          (instance) => instance
-            ..onStart = _handlePanStart
-            ..onUpdate = _handlePanUpdate
-            ..onEnd = _handlePanEnd,
-        ),
-        TapGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          () => TapGestureRecognizer(debugOwner: this),
-          (instance) => instance.onTapUp = _handleTapUp,
-        ),
-      },
-      child: CustomPaint(
-        painter: _DialPainter(
-          baseUnitMultiplier: _secondaryUnitValue,
-          baseUnitHand: _baseUnitValue,
-          labels: _buildBaseUnitLabels(),
-          labelTextStyle:
-              textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
-          textScaler: MediaQuery.textScalerOf(context)
-              .clamp(maxScaleFactor: _kMaxTextScaleFactor),
-          backgroundColor:
-              pickerTheme.dialBackgroundColor ?? _defaultDialBackground(),
-          accentColor: pickerTheme.handColor ?? colorScheme.primary,
-          valueTextStyle:
-              textTheme.displayMedium!.merge(pickerTheme.valueTextStyle),
-          scaleValueText: pickerTheme.valueTextStyle?.fontSize == null,
-          unitTextStyle: textTheme.bodyMedium!.merge(pickerTheme.unitTextStyle),
-          baseUnitLabel: _baseUnitLabel(localization),
-          secondaryUnitLabel: _secondaryUnitLabel(localization),
-          theta: _getThetaForDuration(widget.duration, widget.baseUnit),
+    final increased = widget.duration + _oneBaseUnit;
+    final canIncrease =
+        widget.upperBound == null || increased <= widget.upperBound!;
+    final decreased = widget.duration - _oneBaseUnit;
+    final canDecrease = decreased >= (widget.lowerBound ?? Duration.zero);
+
+    // The gestures are excluded from semantics, so screen readers adjust the
+    // dial one unit at a time, like a slider.
+    return Semantics(
+      slider: true,
+      value: _semanticsValue(widget.duration, localization),
+      increasedValue:
+          canIncrease ? _semanticsValue(increased, localization) : null,
+      decreasedValue:
+          canDecrease ? _semanticsValue(decreased, localization) : null,
+      onIncrease: canIncrease ? () => _selectDuration(increased) : null,
+      onDecrease: canDecrease ? () => _selectDuration(decreased) : null,
+      child: RawGestureDetector(
+        excludeFromSemantics: true,
+        gestures: <Type, GestureRecognizerFactory>{
+          _DialPanGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<_DialPanGestureRecognizer>(
+            () => _DialPanGestureRecognizer(debugOwner: this),
+            (instance) => instance
+              ..onStart = _handlePanStart
+              ..onUpdate = _handlePanUpdate
+              ..onEnd = _handlePanEnd,
+          ),
+          TapGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(debugOwner: this),
+            (instance) => instance.onTapUp = _handleTapUp,
+          ),
+        },
+        child: CustomPaint(
+          painter: _DialPainter(
+            baseUnitMultiplier: _secondaryUnitValue,
+            baseUnitHand: _baseUnitValue,
+            labels: _buildBaseUnitLabels(),
+            labelTextStyle:
+                textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
+            textScaler: MediaQuery.textScalerOf(context)
+                .clamp(maxScaleFactor: _kMaxTextScaleFactor),
+            backgroundColor:
+                pickerTheme.dialBackgroundColor ?? _defaultDialBackground(),
+            accentColor: pickerTheme.handColor ?? colorScheme.primary,
+            valueTextStyle:
+                textTheme.displayMedium!.merge(pickerTheme.valueTextStyle),
+            scaleValueText: pickerTheme.valueTextStyle?.fontSize == null,
+            unitTextStyle:
+                textTheme.bodyMedium!.merge(pickerTheme.unitTextStyle),
+            baseUnitLabel: _baseUnitLabel(localization),
+            secondaryUnitLabel: _secondaryUnitLabel(localization),
+            theta: _getThetaForDuration(widget.duration, widget.baseUnit),
+          ),
         ),
       ),
     );
