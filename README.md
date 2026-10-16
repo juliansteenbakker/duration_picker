@@ -32,7 +32,7 @@ if (!context.mounted || duration == null) return;
 
 ### Inline
 
-`DurationPicker` embeds the dial in your own layout. It works inside scroll views as well.
+`DurationPicker` embeds the dial in your own layout. It works inside scroll views as well, and screen readers can adjust it one unit at a time, like a slider.
 
 ```dart
 class _MyWidgetState extends State<MyWidget> {
