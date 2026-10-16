@@ -700,6 +700,7 @@ class DurationPickerDialog extends StatefulWidget {
     this.decoration,
     this.upperBound,
     this.lowerBound,
+    this.title,
   });
 
   /// The duration initially selected when the dialog is shown.
@@ -708,6 +709,9 @@ class DurationPickerDialog extends StatefulWidget {
   final BoxDecoration? decoration;
   final Duration? upperBound;
   final Duration? lowerBound;
+
+  /// Shown above the dial, usually a [Text].
+  final Widget? title;
 
   @override
   DurationPickerDialogState createState() => DurationPickerDialogState();
@@ -799,6 +803,14 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                if (widget.title != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+                    child: DefaultTextStyle(
+                      style: theme.textTheme.titleLarge!,
+                      child: widget.title!,
+                    ),
+                  ),
                 Expanded(
                   child: picker,
                 ), // picker grows and shrinks with the available space
@@ -870,6 +882,7 @@ Future<Duration?> showDurationPicker({
   BoxDecoration? decoration,
   Duration? upperBound,
   Duration? lowerBound,
+  Widget? title,
 }) {
   return showDialog<Duration>(
     context: context,
@@ -879,6 +892,7 @@ Future<Duration?> showDurationPicker({
       decoration: decoration,
       upperBound: upperBound,
       lowerBound: lowerBound,
+      title: title,
     ),
   );
 }
