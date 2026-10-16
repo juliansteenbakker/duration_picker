@@ -32,7 +32,7 @@ if (!context.mounted || duration == null) return;
 
 ### Inline
 
-`DurationPicker` embeds the dial in your own layout. It works inside scroll views as well.
+`DurationPicker` embeds the dial in your own layout. It works inside scroll views as well, and screen readers can adjust it one unit at a time, like a slider.
 
 ```dart
 class _MyWidgetState extends State<MyWidget> {
@@ -57,13 +57,41 @@ class _MyWidgetState extends State<MyWidget> {
 | `title` | dialog | A widget shown above the dial. |
 | `decoration` | dialog | A `BoxDecoration` for the dialog's content. |
 | `width`, `height` | inline | The size of the picker. |
+| `theme` | both | A `DurationPickerThemeData` for this picker only. See [Theming](#theming). |
+
+## Theming
+
+The picker follows your app's `ColorScheme` and `TextTheme`. To change its colors or text styles everywhere, add a `DurationPickerThemeData` to your theme's extensions:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    colorSchemeSeed: Colors.indigo,
+    extensions: const [
+      DurationPickerThemeData(
+        handColor: Colors.teal,
+        labelTextStyle: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+);
+```
+
+Pass one as `theme` to style a single picker; its fields take precedence over the app-wide ones.
+
+| Field | Default |
+| --- | --- |
+| `dialBackgroundColor` | `ColorScheme.surfaceContainerHighest`, or a light grey with `useMaterial3: false` |
+| `handColor` | `ColorScheme.primary` |
+| `valueTextStyle` | `TextTheme.displayMedium`, sized to the dial |
+| `unitTextStyle` | `TextTheme.bodyMedium` |
+| `labelTextStyle` | `TextTheme.titleMedium` |
 
 ## Localization
 
 The unit labels are available in English, German and Korean, and fall back to English. To use the device language, add the picker's delegate to your app:
 
 ```dart
-import 'package:duration_picker/localization/localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 MaterialApp(
