@@ -1,157 +1,93 @@
-# Duration Picker for flutter
+# Duration Picker for Flutter
 
-Fork from flutter_duration_picker. https://github.com/cdharris/flutter_duration_picker
+A widget for picking durations, inspired by the Material Design time picker. Drag the handle around the dial or tap a value to select it; every full turn adds one unit to the larger unit, so a minute dial counts hours as you keep turning.
 
-A little widget for picking durations. Heavily inspired from the Material Design time picker widget.
+Forked from [flutter_duration_picker](https://github.com/cdharris/flutter_duration_picker).
 
-<img src="https://raw.githubusercontent.com/juliansteenbakker/duration_picker/master/example.gif" height="480px" >
+<p>
+  <img src="https://raw.githubusercontent.com/juliansteenbakker/duration_picker/master/doc/screenshots/inline.png" width="320" alt="Inline duration picker set to 1 hour 25 minutes">
+  <img src="https://raw.githubusercontent.com/juliansteenbakker/duration_picker/master/doc/screenshots/dialog.png" width="320" alt="Duration picker dialog with a title">
+</p>
 
-## How to setup localization
-In order to support other languages, developers need to configure localization settings like the settings for the time picker. Example for english and korean:
+## Installation
+
+```sh
+flutter pub add duration_picker
+```
+
+## Usage
+
+### Dialog
+
+`showDurationPicker` opens the picker in a dialog and returns the selected duration, or `null` when the user cancels.
 
 ```dart
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+final duration = await showDurationPicker(
+  context: context,
+  initialTime: const Duration(minutes: 30),
+  title: const Text('Snooze for'),
+);
+if (!context.mounted || duration == null) return;
+```
+
+### Inline
+
+`DurationPicker` embeds the dial in your own layout. It works inside scroll views as well.
+
+```dart
+class _MyWidgetState extends State<MyWidget> {
+  Duration _duration = const Duration(minutes: 30);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Duration Picker Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      localizationsDelegates: [
-        DurationPickerLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: [Locale('en'), Locale('ko')],
-      home: const MyHomePage(title: 'Duration Picker Demo'),
+    return DurationPicker(
+      duration: _duration,
+      onChange: (value) => setState(() => _duration = value),
     );
   }
 }
 ```
 
-## How to add more languages
+### Options
 
-1. Add a localizations class in `localizataions` dir.
+| Option | Available on | Description |
+| --- | --- | --- |
+| `baseUnit` | both | The unit of the dial: `BaseUnit.millisecond`, `second`, `minute` (default) or `hour`. With `BaseUnit.hour` a full turn is a day. |
+| `lowerBound`, `upperBound` | both | Limit the duration that can be selected. The dialog clamps an `initialTime` outside the bounds. |
+| `title` | dialog | A widget shown above the dial. |
+| `decoration` | dialog | A `BoxDecoration` for the dialog's content. |
+| `width`, `height` | inline | The size of the picker. |
 
-```dart
-class DurationPickerLocalizationsKo extends DurationPickerLocalizations {
-  @override
-  String get baseUnitHour => '시간';
+## Localization
 
-  @override
-  String get baseUnitMillisecond => '밀리초';
-
-  ...
-}
-```
-
-The class should extend `DurationPickerLocalizations`. This makes it easy to write everything you should write.
-
-2. Add the language code to the `supportedLocales` array in `_DurationPickerLocalizationDelegate`.
+The unit labels are available in English, German and Korean, and fall back to English. To use the device language, add the picker's delegate to your app:
 
 ```dart
-class _DurationPickerLocalizationDelegate
-    extends LocalizationsDelegate<DurationPickerLocalizations> {
-  const _DurationPickerLocalizationDelegate();
+import 'package:duration_picker/localization/localization.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-  static const supportedLocales = ['en', 'ko'];
-
-  ...
-
-}
+MaterialApp(
+  localizationsDelegates: const [
+    DurationPickerLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: const [Locale('en'), Locale('de'), Locale('ko')],
+);
 ```
 
-3. Return a `DurationPickerLocalizations` implementation as locale at `load` method in `_DurationPickerLocalizationDelegate`.
-
-```dart
-@override
-  Future<DurationPickerLocalizations> load(Locale locale) async {
-    switch (locale.languageCode) {
-      case 'ko':
-        return DurationPickerLocalizationsKo();
-      default:
-        return DurationPickerLocalizationsEn();
-    }
-  }
-```
-
-## Example Usage:
+This needs `flutter_localizations` in your dependencies:
 
 ```yaml
 dependencies:
-  duration_picker: "^1.0.0"
+  flutter_localizations:
+    sdk: flutter
 ```
 
-```dart
-import 'package:flutter/material.dart';
-import 'package:duration_picker/duration_picker.dart';
+### Adding a language
 
-void main() => runApp(MyApp());
+Contributions for other languages are welcome:
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Duration Picker Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Duration Picker Demo'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  Duration _duration = Duration(hours: 0, minutes: 0);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-                child: DurationPicker(
-              duration: _duration,
-              onChange: (val) {
-                setState(() => _duration = val);
-              },
-            ))
-          ],
-        ),
-      ),
-      floatingActionButton: Builder(
-          builder: (BuildContext context) => FloatingActionButton(
-                onPressed: () async {
-                  var resultingDuration = await showDurationPicker(
-                    context: context,
-                    initialTime: Duration(minutes: 30),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Chose duration: $resultingDuration')));
-                },
-                tooltip: 'Popup Duration Picker',
-                child: Icon(Icons.add),
-              )),
-    );
-  }
-}
-
-```
-
+1. Add a class extending `DurationPickerLocalizations` in `lib/localization/`, like `DurationPickerLocalizationsDe` in `de.dart`.
+2. Add the language code to `supportedLocales` in `_DurationPickerLocalizationDelegate` and return your class from its `load` method.
