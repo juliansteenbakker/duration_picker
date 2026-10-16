@@ -8,3 +8,10 @@
 /build
 /captures
 GeneratedPluginRegistrant.java
+gradle-wrapper.jar
+/gradlew
+/gradlew.bat
+.cxx/
+key.properties
+**/*.keystore
+**/*.jks
