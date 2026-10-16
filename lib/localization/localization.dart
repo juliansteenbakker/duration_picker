@@ -1,5 +1,6 @@
 import 'package:duration_picker/localization/en.dart';
 import 'package:duration_picker/localization/ko.dart';
+import 'package:duration_picker/localization/de.dart';
 import 'package:flutter/material.dart';
 
 abstract class DurationPickerLocalizations {
@@ -35,7 +36,7 @@ class _DurationPickerLocalizationDelegate
     extends LocalizationsDelegate<DurationPickerLocalizations> {
   const _DurationPickerLocalizationDelegate();
 
-  static const supportedLocales = ['en', 'ko'];
+  static const supportedLocales = ['en', 'ko', 'de'];
 
   @override
   bool isSupported(Locale locale) =>
@@ -46,6 +47,8 @@ class _DurationPickerLocalizationDelegate
     switch (locale.languageCode) {
       case 'ko':
         return DurationPickerLocalizationsKo();
+      case 'de':
+        return DurationPickerLocalizationsDe();
       default:
         return DurationPickerLocalizationsEn();
     }
