@@ -125,4 +125,27 @@ void main() {
     expect(merged.labelTextStyle!.fontSize, 12);
     expect(merged.labelTextStyle!.color, Colors.red);
   });
+
+  testWidgets('the ring stays visible on Material 2', (tester) async {
+    final theme = ThemeData(useMaterial3: false);
+    // On Material 2 the highest container color is the same as the surface.
+    expect(
+        theme.colorScheme.surfaceContainerHighest, theme.colorScheme.surface);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: DurationPicker(onChange: (_) {}),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      _dial,
+      _paintsDial(ring: Colors.grey[200]!, hand: theme.colorScheme.primary),
+    );
+  });
 }

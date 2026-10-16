@@ -16,7 +16,7 @@ class DurationPickerThemeData extends ThemeExtension<DurationPickerThemeData> {
   });
 
   /// The ring around the dial. Defaults to
-  /// [ColorScheme.surfaceContainerHighest].
+  /// [ColorScheme.surfaceContainerHighest], or a light grey on Material 2.
   final Color? dialBackgroundColor;
 
   /// The handle and the elapsed part of the ring. Defaults to

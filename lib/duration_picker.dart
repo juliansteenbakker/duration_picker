@@ -623,6 +623,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     return labels;
   }
 
+  Color _defaultDialBackground() {
+    if (themeData.useMaterial3) {
+      return themeData.colorScheme.surfaceContainerHighest;
+    }
+    // Material 2 schemes set surfaceContainerHighest to surface, which would
+    // hide the ring against the dialog, so keep the 1.x colors there.
+    return themeData.brightness == Brightness.light
+        ? Colors.grey[200]!
+        : themeData.colorScheme.surface;
+  }
+
   String _baseUnitLabel(DurationPickerLocalizations localization) {
     switch (widget.baseUnit) {
       case BaseUnit.millisecond:
@@ -685,8 +696,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           labels: _buildBaseUnitLabels(
             textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
           ),
-          backgroundColor: pickerTheme.dialBackgroundColor ??
-              colorScheme.surfaceContainerHighest,
+          backgroundColor:
+              pickerTheme.dialBackgroundColor ?? _defaultDialBackground(),
           accentColor: pickerTheme.handColor ?? colorScheme.primary,
           valueTextStyle:
               textTheme.displayMedium!.merge(pickerTheme.valueTextStyle),

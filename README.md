@@ -81,7 +81,7 @@ Pass one as `theme` to style a single picker; its fields take precedence over th
 
 | Field | Default |
 | --- | --- |
-| `dialBackgroundColor` | `ColorScheme.surfaceContainerHighest` |
+| `dialBackgroundColor` | `ColorScheme.surfaceContainerHighest`, or a light grey with `useMaterial3: false` |
 | `handColor` | `ColorScheme.primary` |
 | `valueTextStyle` | `TextTheme.displayMedium`, sized to the dial |
 | `unitTextStyle` | `TextTheme.bodyMedium` |
