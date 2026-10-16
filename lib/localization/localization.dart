@@ -1,6 +1,6 @@
+import 'package:duration_picker/localization/de.dart';
 import 'package:duration_picker/localization/en.dart';
 import 'package:duration_picker/localization/ko.dart';
-import 'package:duration_picker/localization/de.dart';
 import 'package:flutter/material.dart';
 
 abstract class DurationPickerLocalizations {
