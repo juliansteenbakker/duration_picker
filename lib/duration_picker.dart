@@ -232,6 +232,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    assert(
+      widget.lowerBound == null ||
+          widget.upperBound == null ||
+          widget.lowerBound! <= widget.upperBound!,
+      'lowerBound must not be greater than upperBound.',
+    );
     _thetaController = AnimationController(
       duration: _kDialAnimateDuration,
       vsync: this,
@@ -674,7 +680,15 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedDuration = widget.initialTime;
+    var initialTime = widget.initialTime;
+    final lowerBound = widget.lowerBound;
+    final upperBound = widget.upperBound;
+    if (lowerBound != null && initialTime < lowerBound) {
+      initialTime = lowerBound;
+    } else if (upperBound != null && initialTime > upperBound) {
+      initialTime = upperBound;
+    }
+    _selectedDuration = initialTime;
   }
 
   @override
