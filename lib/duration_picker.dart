@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:duration_picker/localization/localization.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -632,12 +633,23 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
 
-    return GestureDetector(
+    return RawGestureDetector(
       excludeFromSemantics: true,
-      onPanStart: _handlePanStart,
-      onPanUpdate: _handlePanUpdate,
-      onPanEnd: _handlePanEnd,
-      onTapUp: _handleTapUp,
+      gestures: <Type, GestureRecognizerFactory>{
+        _DialPanGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<_DialPanGestureRecognizer>(
+          () => _DialPanGestureRecognizer(debugOwner: this),
+          (instance) => instance
+            ..onStart = _handlePanStart
+            ..onUpdate = _handlePanUpdate
+            ..onEnd = _handlePanEnd,
+        ),
+        TapGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(debugOwner: this),
+          (instance) => instance.onTapUp = _handleTapUp,
+        ),
+      },
       child: CustomPaint(
         painter: DialPainter(
           baseUnitMultiplier: _secondaryUnitValue,
@@ -653,6 +665,21 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         ),
       ),
     );
+  }
+}
+
+/// A pan that starts at half the touch slop instead of the larger pan slop,
+/// so it claims the drag before a surrounding scroll view does.
+class _DialPanGestureRecognizer extends PanGestureRecognizer {
+  _DialPanGestureRecognizer({super.debugOwner});
+
+  @override
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double? deviceTouchSlop,
+  ) {
+    return globalDistanceMoved.abs() >
+        computeHitSlop(pointerDeviceKind, gestureSettings) / 2;
   }
 }
 

@@ -111,4 +111,49 @@ void main() {
 
     expect(changes.last, const Duration(hours: 1, minutes: 45));
   });
+
+  testWidgets('a drag on the dial inside a scroll view turns the dial', (
+    tester,
+  ) async {
+    final changes = <Duration>[];
+    var duration = const Duration(minutes: 15);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: [
+              StatefulBuilder(
+                builder: (context, setState) => DurationPicker(
+                  width: _size,
+                  height: _size,
+                  duration: duration,
+                  onChange: (value) {
+                    changes.add(value);
+                    setState(() => duration = value);
+                  },
+                ),
+              ),
+              const SizedBox(height: 2000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Drag up along the ring from 15 towards 10 minutes, which would
+    // otherwise scroll the list.
+    final gesture = await tester.startGesture(_pointAt(tester, 15, _radius));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(-2, -4));
+      await tester.pump();
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 0);
+    expect(changes.last, lessThan(const Duration(minutes: 15)));
+  });
 }
