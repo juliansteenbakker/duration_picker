@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:duration_picker/localization/localization.dart';
 import 'package:duration_picker/src/duration_picker_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,7 @@ const double _kCircleTop = _kPiByTwo;
 class _DialPainter extends CustomPainter {
   const _DialPainter({
     required this.labels,
+    required this.labelTextStyle,
     required this.backgroundColor,
     required this.accentColor,
     required this.valueTextStyle,
@@ -36,7 +38,8 @@ class _DialPainter extends CustomPainter {
     required this.baseUnitHand,
   });
 
-  final List<TextPainter> labels;
+  final List<String> labels;
+  final TextStyle labelTextStyle;
   final Color backgroundColor;
   final Color accentColor;
   final TextStyle valueTextStyle;
@@ -132,6 +135,8 @@ class _DialPainter extends CustomPainter {
             textMinPainter.height / 2,
       ),
     );
+    textDurationValuePainter.dispose();
+    textMinPainter.dispose();
 
     // Draw an arc around the circle for the amount of the circle that has elapsed.
     final elapsedPainter = Paint()
@@ -150,28 +155,29 @@ class _DialPainter extends CustomPainter {
     );
 
     // Paint the labels (the minute strings)
-    void paintLabels(List<TextPainter> labels) {
-      final labelThetaIncrement = -_kTwoPi / labels.length;
-      var labelTheta = _kPiByTwo;
+    final labelThetaIncrement = -_kTwoPi / labels.length;
+    var labelTheta = _kPiByTwo;
+    for (final text in labels) {
+      final label = TextPainter(
+        text: TextSpan(style: labelTextStyle, text: text),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final labelOffset = Offset(-label.width / 2.0, -label.height / 2.0);
 
-      for (final label in labels) {
-        final labelOffset = Offset(-label.width / 2.0, -label.height / 2.0);
+      label.paint(
+        canvas,
+        getOffsetForTheta(labelTheta, radius - 40.0) + labelOffset,
+      );
+      label.dispose();
 
-        label.paint(
-          canvas,
-          getOffsetForTheta(labelTheta, radius - 40.0) + labelOffset,
-        );
-
-        labelTheta += labelThetaIncrement;
-      }
+      labelTheta += labelThetaIncrement;
     }
-
-    paintLabels(labels);
   }
 
   @override
   bool shouldRepaint(_DialPainter oldDelegate) {
-    return oldDelegate.labels != labels ||
+    return !listEquals(oldDelegate.labels, labels) ||
+        oldDelegate.labelTextStyle != labelTextStyle ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.accentColor != accentColor ||
         oldDelegate.valueTextStyle != valueTextStyle ||
@@ -228,9 +234,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       end: 0,
       //end: _getThetaForDuration(widget.duration, widget.baseUnit),
     );
-    _theta = _thetaTween.animate(
-      CurvedAnimation(parent: _thetaController, curve: Curves.fastOutSlowIn),
-    )..addListener(() => setState(() {}));
+    _thetaCurve = CurvedAnimation(
+      parent: _thetaController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _theta = _thetaTween.animate(_thetaCurve)
+      ..addListener(() => setState(() {}));
     _thetaController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _secondaryUnitValue = _secondaryUnitHand();
@@ -290,6 +299,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _thetaCurve.dispose();
     _thetaController.dispose();
     super.dispose();
   }
@@ -297,6 +307,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   late Tween<double> _thetaTween;
   late Animation<double> _theta;
   late AnimationController _thetaController;
+  late CurvedAnimation _thetaCurve;
 
   int _secondaryUnitValue = 0;
   bool _dragging = false;
@@ -577,7 +588,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
   }
 
-  List<TextPainter> _buildBaseUnitLabels(TextStyle style) {
+  List<String> _buildBaseUnitLabels() {
     var baseUnitMarkerValues = <Duration>[];
 
     switch (widget.baseUnit) {
@@ -613,15 +624,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
             List.generate(length, (index) => Duration(hours: index * interval));
     }
 
-    final labels = <TextPainter>[];
-    for (final duration in baseUnitMarkerValues) {
-      final painter = TextPainter(
-        text: TextSpan(style: style, text: _durationToBaseUnitString(duration)),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      labels.add(painter);
-    }
-    return labels;
+    return baseUnitMarkerValues.map(_durationToBaseUnitString).toList();
   }
 
   Color _defaultDialBackground() {
@@ -694,9 +697,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         painter: _DialPainter(
           baseUnitMultiplier: _secondaryUnitValue,
           baseUnitHand: _baseUnitValue,
-          labels: _buildBaseUnitLabels(
-            textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
-          ),
+          labels: _buildBaseUnitLabels(),
+          labelTextStyle:
+              textTheme.titleMedium!.merge(pickerTheme.labelTextStyle),
           backgroundColor:
               pickerTheme.dialBackgroundColor ?? _defaultDialBackground(),
           accentColor: pickerTheme.handColor ?? colorScheme.primary,
