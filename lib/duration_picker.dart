@@ -17,9 +17,8 @@ const double _kPiByTwo = math.pi / 2; // 90 degrees in radians
 
 const double _kCircleTop = _kPiByTwo;
 
-/// Use [DialPainter] to style the durationPicker to your style.
-class DialPainter extends CustomPainter {
-  const DialPainter({
+class _DialPainter extends CustomPainter {
+  const _DialPainter({
     required this.context,
     required this.labels,
     required this.backgroundColor,
@@ -199,7 +198,7 @@ class DialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DialPainter oldDelegate) {
+  bool shouldRepaint(_DialPainter oldDelegate) {
     return oldDelegate.labels != labels ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.accentColor != accentColor ||
@@ -680,7 +679,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         ),
       },
       child: CustomPaint(
-        painter: DialPainter(
+        painter: _DialPainter(
           baseUnitMultiplier: _secondaryUnitValue,
           baseUnitHand: _baseUnitValue,
           baseUnit: widget.baseUnit,
@@ -933,8 +932,6 @@ class DurationPicker extends StatelessWidget {
   final BaseUnit baseUnit;
   final Duration? upperBound;
   final Duration? lowerBound;
-  @Deprecated('This value was never used')
-  final double? snapToMins;
 
   final double? width;
   final double? height;
@@ -948,7 +945,6 @@ class DurationPicker extends StatelessWidget {
     this.lowerBound,
     this.width,
     this.height,
-    @Deprecated('This value was never used') this.snapToMins,
   });
 
   @override
