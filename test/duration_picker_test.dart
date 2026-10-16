@@ -90,4 +90,25 @@ void main() {
 
     expect(changes.last, Duration.zero);
   });
+
+  testWidgets('a tap on the dial selects that value', (tester) async {
+    final changes = await _pumpPicker(tester, Duration.zero);
+
+    await tester.tapAt(_pointAt(tester, 15.5, _radius));
+    await tester.pumpAndSettle();
+
+    expect(changes.last, const Duration(minutes: 15));
+  });
+
+  testWidgets('a tap keeps the full hours already selected', (tester) async {
+    final changes = await _pumpPicker(
+      tester,
+      const Duration(hours: 1, minutes: 10),
+    );
+
+    await tester.tapAt(_pointAt(tester, 45.5, _radius));
+    await tester.pumpAndSettle();
+
+    expect(changes.last, const Duration(hours: 1, minutes: 45));
+  });
 }

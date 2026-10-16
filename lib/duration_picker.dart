@@ -379,10 +379,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
   }
 
-  Duration _getTimeForTheta(double theta) {
-    return _angleToDuration(_turningAngle);
-  }
-
   Duration _notifyOnChangedIfNeeded() {
     _secondaryUnitValue = _secondaryUnitHand();
     _baseUnitValue = _baseUnitHand();
@@ -392,10 +388,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     return d;
   }
 
+  double _angleForPosition() {
+    final offset = _position! - _center!;
+    return (math.atan2(offset.dx, offset.dy) - _kPiByTwo) % _kTwoPi;
+  }
+
   void _updateThetaForPan() {
     setState(() {
-      final offset = _position! - _center!;
-      final angle = (math.atan2(offset.dx, offset.dy) - _kPiByTwo) % _kTwoPi;
+      final angle = _angleForPosition();
 
       // Stop accidental abrupt pans from making the dial seem like it starts from 1h.
       // (happens when wanting to pan from 0 clockwise, but when doing so quickly, one actually pans from before 0 (e.g. setting the duration to 59mins, and then crossing 0, which would then mean 1h 1min).
@@ -524,6 +524,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _turningAngle = _turningAngle + (newTheta - oldTheta);
     }
 
+    _clampTurningAngle();
+  }
+
+  void _clampTurningAngle() {
     // Without a lower bound, zero is the limit, so a fast pan back across
     // the top can't produce a negative duration.
     final lowerBoundAngle = _lowerBoundAngel ?? _kPiByTwo;
@@ -546,12 +550,18 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final box = context.findRenderObject() as RenderBox?;
     _position = box?.globalToLocal(details.globalPosition);
     _center = box?.size.center(Offset.zero);
-    _updateThetaForPan();
-    _notifyOnChangedIfNeeded();
 
-    _animateTo(
-      _getThetaForDuration(_getTimeForTheta(_theta.value), widget.baseUnit),
-    );
+    // A tap sets the position within the current turn and keeps the number
+    // of full turns, like picking minutes on a clock without changing hours.
+    final turns = (_angleToBaseUnit(_turningAngle) + 1e-9) ~/
+        _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
+    final turnFraction =
+        ((_kPiByTwo - _angleForPosition()) % _kTwoPi) / _kTwoPi;
+    _turningAngle = _kPiByTwo - (turns + turnFraction) * _kTwoPi;
+    _clampTurningAngle();
+
+    final duration = _notifyOnChangedIfNeeded();
+    _animateTo(_getThetaForDuration(duration, widget.baseUnit));
     _dragging = false;
     _position = null;
     _center = null;
