@@ -63,7 +63,7 @@ class DialPainter extends CustomPainter {
       canvas.drawCircle(
         centerPoint,
         radius,
-        Paint()..color = accentColor.withOpacity((i == 0) ? 0.3 : 0.1),
+        Paint()..color = accentColor.withValues(alpha: (i == 0) ? 0.3 : 0.1),
       );
     }
 
@@ -162,7 +162,7 @@ class DialPainter extends CustomPainter {
     final elapsedPainter = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..color = accentColor.withOpacity(0.3)
+      ..color = accentColor.withValues(alpha: 0.3)
       ..isAntiAlias = true
       ..strokeWidth = radius * 0.12;
 
@@ -396,7 +396,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       if (angle >= _kCircleTop &&
           _theta.value <= _kCircleTop &&
           _theta.value >= 0.1 && // to allow the radians sign change at 15mins.
-          _secondaryUnitValue == 0) return;
+          _secondaryUnitValue == 0) {
+        return;
+      }
 
       _thetaTween
         ..begin = angle
@@ -511,10 +513,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _turningAngle = _turningAngle + (newTheta - oldTheta);
     }
 
-    if (_upperBoundAngle != null && _turningAngle < _upperBoundAngle!) {
-      _turningAngle = _upperBoundAngle!;
-    } else if (_lowerBoundAngel != null && _turningAngle > _lowerBoundAngel!) {
-      _turningAngle = _lowerBoundAngel!;
+    if (_upperBoundAngle != null && _turningAngle < _upperBoundAngle) {
+      _turningAngle = _upperBoundAngle;
+    } else if (_lowerBoundAngel != null && _turningAngle > _lowerBoundAngel) {
+      _turningAngle = _lowerBoundAngel;
     }
   }
 
@@ -555,7 +557,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           length,
           (index) => Duration(milliseconds: index * interval),
         );
-        break;
       case BaseUnit.second:
         const int interval = 5;
         const int factor = Duration.secondsPerMinute;
@@ -564,7 +565,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           length,
           (index) => Duration(seconds: index * interval),
         );
-        break;
       case BaseUnit.minute:
         const int interval = 5;
         const int factor = Duration.minutesPerHour;
@@ -573,14 +573,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           length,
           (index) => Duration(minutes: index * interval),
         );
-        break;
       case BaseUnit.hour:
         const int interval = 3;
         const int factor = Duration.hoursPerDay;
         const int length = factor ~/ interval;
         baseUnitMarkerValues =
             List.generate(length, (index) => Duration(hours: index * interval));
-        break;
     }
 
     final labels = <TextPainter>[];
@@ -600,10 +598,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     switch (themeData.brightness) {
       case Brightness.light:
         backgroundColor = Colors.grey[200];
-        break;
       case Brightness.dark:
         backgroundColor = themeData.colorScheme.surface;
-        break;
     }
 
     final theme = Theme.of(context);
@@ -647,13 +643,13 @@ class DurationPickerDialog extends StatefulWidget {
   ///
   /// [initialTime] must not be null.
   const DurationPickerDialog({
-    Key? key,
+    super.key,
     required this.initialTime,
     this.baseUnit = BaseUnit.minute,
     this.decoration,
     this.upperBound,
     this.lowerBound,
-  }) : super(key: key);
+  });
 
   /// The duration initially selected when the dialog is shown.
   final Duration initialTime;
@@ -703,7 +699,7 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
     assert(debugCheckHasMediaQuery(context));
     final theme = Theme.of(context);
     final boxDecoration =
-        widget.decoration ?? BoxDecoration(color: theme.dialogBackgroundColor);
+        widget.decoration ?? BoxDecoration(color: theme.colorScheme.surface);
     final Widget picker = Padding(
       padding: const EdgeInsets.all(16.0),
       child: AspectRatio(
@@ -716,9 +712,11 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
       ),
     );
 
-    final Widget actions = ButtonBarTheme(
-      data: ButtonBarTheme.of(context),
-      child: ButtonBar(
+    final Widget actions = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: OverflowBar(
+        alignment: MainAxisAlignment.end,
+        spacing: 8.0,
         children: <Widget>[
           TextButton(
             onPressed: _handleCancel,
@@ -782,12 +780,7 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
       ),
     );
 
-    return Theme(
-      data: theme.copyWith(
-        dialogBackgroundColor: Colors.transparent,
-      ),
-      child: dialog,
-    );
+    return dialog;
   }
 
   @override
@@ -816,7 +809,7 @@ Future<Duration?> showDurationPicker({
   BoxDecoration? decoration,
   Duration? upperBound,
   Duration? lowerBound,
-}) async {
+}) {
   return showDialog<Duration>(
     context: context,
     builder: (BuildContext context) => DurationPickerDialog(
@@ -843,7 +836,7 @@ class DurationPicker extends StatelessWidget {
   final double? height;
 
   const DurationPicker({
-    Key? key,
+    super.key,
     this.duration = Duration.zero,
     required this.onChange,
     this.baseUnit = BaseUnit.minute,
@@ -852,7 +845,7 @@ class DurationPicker extends StatelessWidget {
     this.width,
     this.height,
     @Deprecated('This value was never used') this.snapToMins,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
