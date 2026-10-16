@@ -92,7 +92,6 @@ Pass one as `theme` to style a single picker; its fields take precedence over th
 The unit labels are available in English, German and Korean, and fall back to English. To use the device language, add the picker's delegate to your app:
 
 ```dart
-import 'package:duration_picker/localization/localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 MaterialApp(

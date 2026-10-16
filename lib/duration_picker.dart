@@ -5,6 +5,7 @@ import 'package:duration_picker/src/duration_picker_theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+export 'localization/localization.dart' show DurationPickerLocalizations;
 export 'src/duration_picker_theme.dart';
 
 const Duration _kDialAnimateDuration = Duration(milliseconds: 200);
@@ -762,10 +763,10 @@ class DurationPickerDialog extends StatefulWidget {
   final DurationPickerThemeData? theme;
 
   @override
-  DurationPickerDialogState createState() => DurationPickerDialogState();
+  State<DurationPickerDialog> createState() => _DurationPickerDialogState();
 }
 
-class DurationPickerDialogState extends State<DurationPickerDialog> {
+class _DurationPickerDialogState extends State<DurationPickerDialog> {
   @override
   void initState() {
     super.initState();
@@ -786,7 +787,6 @@ class DurationPickerDialogState extends State<DurationPickerDialog> {
     localizations = MaterialLocalizations.of(context);
   }
 
-  Duration? get selectedDuration => _selectedDuration;
   Duration? _selectedDuration;
 
   late MaterialLocalizations localizations;
