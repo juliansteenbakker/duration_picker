@@ -393,10 +393,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
       // Stop accidental abrupt pans from making the dial seem like it starts from 1h.
       // (happens when wanting to pan from 0 clockwise, but when doing so quickly, one actually pans from before 0 (e.g. setting the duration to 59mins, and then crossing 0, which would then mean 1h 1min).
-      if (angle >= _kCircleTop &&
+      // Only a move from the first quarter across the top into the last
+      // quarter is blocked, so moves past the 15 minute mark still work.
+      if (_secondaryUnitValue == 0 &&
           _theta.value <= _kCircleTop &&
-          _theta.value >= 0.1 && // to allow the radians sign change at 15mins.
-          _secondaryUnitValue == 0) {
+          angle > _kCircleTop &&
+          angle <= math.pi) {
         return;
       }
 
@@ -446,27 +448,30 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   Duration _baseUnitToDuration(double baseUnitValue) {
     final int unitFactor = _getBaseUnitToSecondaryUnitFactor(widget.baseUnit);
+    // Angles carry floating point error, so 5 minutes can come out as
+    // 4.9999 and truncate to 4.
+    final units = (baseUnitValue + 1e-9).floorToDouble();
 
     switch (widget.baseUnit) {
       case BaseUnit.millisecond:
         return Duration(
-          seconds: baseUnitValue ~/ unitFactor,
-          milliseconds: (baseUnitValue % unitFactor.toDouble()).toInt(),
+          seconds: units ~/ unitFactor,
+          milliseconds: (units % unitFactor.toDouble()).toInt(),
         );
       case BaseUnit.second:
         return Duration(
-          minutes: baseUnitValue ~/ unitFactor,
-          seconds: (baseUnitValue % unitFactor.toDouble()).toInt(),
+          minutes: units ~/ unitFactor,
+          seconds: (units % unitFactor.toDouble()).toInt(),
         );
       case BaseUnit.minute:
         return Duration(
-          hours: baseUnitValue ~/ unitFactor,
-          minutes: (baseUnitValue % unitFactor.toDouble()).toInt(),
+          hours: units ~/ unitFactor,
+          minutes: (units % unitFactor.toDouble()).toInt(),
         );
       case BaseUnit.hour:
         return Duration(
-          days: baseUnitValue ~/ unitFactor,
-          hours: (baseUnitValue % unitFactor.toDouble()).toInt(),
+          days: units ~/ unitFactor,
+          hours: (units % unitFactor.toDouble()).toInt(),
         );
     }
   }
@@ -513,10 +518,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _turningAngle = _turningAngle + (newTheta - oldTheta);
     }
 
+    // Without a lower bound, zero is the limit, so a fast pan back across
+    // the top can't produce a negative duration.
+    final lowerBoundAngle = _lowerBoundAngel ?? _kPiByTwo;
     if (_upperBoundAngle != null && _turningAngle < _upperBoundAngle) {
       _turningAngle = _upperBoundAngle;
-    } else if (_lowerBoundAngel != null && _turningAngle > _lowerBoundAngel) {
-      _turningAngle = _lowerBoundAngel;
+    } else if (_turningAngle > lowerBoundAngle) {
+      _turningAngle = lowerBoundAngle;
     }
   }
 
